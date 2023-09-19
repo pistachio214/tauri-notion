@@ -67,10 +67,9 @@ const App: React.FC = () => {
                     items={items} />
 
             </Sider>
-            <Layout className="site-layout" style={{ marginLeft: 300 }}>
-                <Content style={{ margin: '12px 16px', overflow: 'initial' }}>
+            <Layout className="site-layout" style={{ marginLeft: 300,height: '100%' }}>
+                <Content style={{ margin: '0 16px', overflow: 'initial', }}>
                     <Outlet />
-
                 </Content>
             </Layout>
         </Layout>

@@ -1,5 +1,5 @@
 {
-  "name": "antd-tauri-app",
+  "name": "tauri-notion",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,6 +13,7 @@
     "@tauri-apps/api": "^1.4.0",
     "antd": "^5.9.1",
     "axios": "^1.5.0",
+    "for-editor": "^0.3.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router": "^6.16.0",

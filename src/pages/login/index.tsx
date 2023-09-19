@@ -1,15 +1,18 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-import { Checkbox, Form, Input } from "antd";
+import { Form, Input, Select } from "antd";
+import type { SelectProps } from 'antd';
 import {
     EyeInvisibleOutlined,
     EyeTwoTone,
     LockOutlined,
-    UserOutlined,
+    GithubOutlined,
 } from "@ant-design/icons";
-import { message } from "../../components/Antd/EscapeAntd";
 
+import { invoke } from '@tauri-apps/api/tauri'
+
+import { message } from "../../components/Antd/EscapeAntd";
 import {
     LoginContainer,
     LoginBg,
@@ -18,16 +21,18 @@ import {
     Title,
     IconBox,
     LoginButton,
+    UsernameButton,
 } from "./style";
-
 import login_img from "../../assets/login_img.png";
 import react_icon from "../../assets/react.svg";
 import defaultSettings from "./../../defaultSettings";
+import CreateUserModalComponent from "../../components/User/CreateUserModalComponent";
+import { getName } from "@tauri-apps/api/app";
 
 interface FormState {
     username: string;
     password: string;
-    remember: boolean;
+    remember?: boolean;
     code: string
 }
 
@@ -41,6 +46,31 @@ const Login: React.FC = () => {
 
     //表单数据
     const [form] = Form.useForm<FormState>();
+
+    const [openAddUserModal, setOpenAddUserModal] = useState<boolean>(false);
+
+    const options: SelectProps['options'] = [
+        {
+            label: <><GithubOutlined /> ( GitHub ) / RogerPeng123 / my-notion</>,
+            value: 1
+        },
+        {
+            label: <>( Gitee ) / flayingoranges / test-git</>,
+            value: 2
+        }
+    ];
+
+
+    const testRust = () => {
+        console.log('这里去调用rust代码')
+        getName().then(res => {
+            let appName = res.replace(/\s+/g, "");
+            
+            invoke<string>('generate_json', { appName: appName }).then(() => {
+                console.log('success')
+            })
+        });
+    }
 
     const rememberChecked = !localStorage.getItem("rememberme");
 
@@ -67,19 +97,19 @@ const Login: React.FC = () => {
                 <div className={'title-description'}>{defaultSettings.titleDescription}</div>
 
                 <Form
-                    name="dynamic_rule"
+                    name="select_rule"
                     form={form}
                     initialValues={{ remember: rememberChecked }}
                     onFinish={onFinish}
                 >
+
                     <Form.Item
                         name="username"
                         rules={[{ required: true, message: "请输入账号" }]}
                     >
-                        <Input
-                            prefix={<UserOutlined className="site-form-item-icon" />}
-                            placeholder="账号(username)"
-                            allowClear
+                        <Select
+                            placeholder={'请选择您的用户'}
+                            options={options}
                         />
                     </Form.Item>
 
@@ -98,18 +128,36 @@ const Login: React.FC = () => {
                     </Form.Item>
 
                     <Form.Item>
-                        <Form.Item name="remember" valuePropName="checked" noStyle>
-                            <Checkbox>记住我</Checkbox>
-                        </Form.Item>
-                    </Form.Item>
-
-                    <Form.Item>
                         <LoginButton type="primary" htmlType="submit">
                             登录
                         </LoginButton>
                     </Form.Item>
+
+                    <Form.Item>
+                        <UsernameButton
+                            type="dashed"
+                            onClick={() => setOpenAddUserModal(true)}
+                        >
+                            添加账号
+                        </UsernameButton>
+                    </Form.Item>
+
+                    <Form.Item>
+                        <UsernameButton
+                            type="dashed"
+                            onClick={() => testRust()}
+                        >
+                            测试按钮
+                        </UsernameButton>
+                    </Form.Item>
                 </Form>
+
             </LoginBox>
+
+            <CreateUserModalComponent
+                open={openAddUserModal}
+                onClose={() => setOpenAddUserModal(false)}
+            />
         </LoginContainer>
     )
 }

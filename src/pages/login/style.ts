@@ -71,7 +71,9 @@ export const LoginBox = styled.div`
     padding-top: 15px;
     color: rgba(0, 0, 0, 0.45);
     font-size: 14px;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
   input {
@@ -93,6 +95,10 @@ export const IconBox = styled.img`
 `;
 
 export const LoginButton = styled(Button)`
+  width: 100%;
+`;
+
+export const UsernameButton = styled(Button)`
   width: 100%;
 `;
 

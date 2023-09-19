@@ -16,6 +16,14 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "app": {
+        "all": true,
+        "hide": true,
+        "show": true
+      },
+      "path": {
+        "all": true
       }
     },
     "bundle": {
