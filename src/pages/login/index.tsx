@@ -93,14 +93,14 @@ const Login: React.FC = () => {
             const data: FormState = form.getFieldsValue();
             console.log(data)
 
-            invoke<SysUser>('user_login', { username: data.id, password: data.password }).then(res => {
-                sessionStorage.setItem("token", res.id!);
+            invoke<SysUser>('user_login', { username: data.id, password: data.password })
+                .then(res => {
+                    sessionStorage.setItem("token", res.id!);
 
-                message.success('🎉🎉🎉 登录成功', 1);
-                navigate('/dashboard');
-            }).catch(err => message.error(err))
-
-
+                    message.success('🎉🎉🎉 登录成功', 1);
+                    navigate('/dashboard');
+                })
+                .catch(err => message.error(err))
         })
     }
 
