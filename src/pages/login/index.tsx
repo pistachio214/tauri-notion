@@ -86,8 +86,6 @@ const Login: React.FC = () => {
         });
     }
 
-    const rememberChecked = !localStorage.getItem("rememberme");
-
     const onFinish = () => {
         form.validateFields().then(async () => {
             const data: FormState = form.getFieldsValue();
@@ -117,7 +115,6 @@ const Login: React.FC = () => {
                 <Form
                     name="select_rule"
                     form={form}
-                    initialValues={{ remember: rememberChecked }}
                     onFinish={onFinish}
                 >
 
