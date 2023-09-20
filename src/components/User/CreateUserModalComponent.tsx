@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { RuleObject, StoreValue } from "rc-field-form/lib/interface";
 import { Modal, Form, Input, Select } from "antd";
 import {
@@ -18,8 +18,6 @@ interface IProps {
 
 const CreateUserModalComponent: React.FC<IProps> = (props: IProps) => {
 
-    const [form] = Form.useForm();
-
     const options = [
         {
             label: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<GithubOutlined />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GitHub </>,
@@ -31,11 +29,19 @@ const CreateUserModalComponent: React.FC<IProps> = (props: IProps) => {
         }
     ];
 
+    const [form] = Form.useForm();
+
+    useEffect(() => {
+        if (props.open) {
+            form.resetFields();
+        }
+    }, [props.open]) // eslint-disable-line
+
     const handleOk = () => {
         let data: SysUser = form.getFieldsValue();
 
         invoke<SysUser>('add_user_info', { data }).then(() => {
-            console.log('success');
+            props.onClose();
         })
     }
 
@@ -71,6 +77,7 @@ const CreateUserModalComponent: React.FC<IProps> = (props: IProps) => {
                     labelAlign="right"
                     onFinish={() => handleOk()}
                     autoComplete="off"
+
                 >
                     <Form.Item
                         label="类型"
@@ -130,7 +137,9 @@ const CreateUserModalComponent: React.FC<IProps> = (props: IProps) => {
                         label="设置密码"
                         name="password"
                         rules={[
-                            { required: true, message: '请输入密码!' }
+                            { required: true, message: '请输入密码!' },
+                            { min: 8, message: "密码长度最小8位" },
+                            { max: 18, message: "密码长度最大18位" },
                         ]}
                     >
                         <Input allowClear placeholder="请输入密码" />

@@ -1,5 +1,6 @@
 
 interface SysUser {
+    id?: string
     type: number
     access_token: string
     owner: string

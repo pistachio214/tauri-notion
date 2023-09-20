@@ -8,6 +8,7 @@ import {
     EyeTwoTone,
     LockOutlined,
     GithubOutlined,
+    GitlabFilled,
 } from "@ant-design/icons";
 
 import { invoke } from '@tauri-apps/api/tauri'
@@ -27,48 +28,61 @@ import login_img from "../../assets/login_img.png";
 import react_icon from "../../assets/react.svg";
 import defaultSettings from "./../../defaultSettings";
 import CreateUserModalComponent from "../../components/User/CreateUserModalComponent";
-import { getName } from "@tauri-apps/api/app";
+import { SysUser } from "../../types/user";
 
 interface FormState {
-    username: string;
+    id: string;
     password: string;
-    remember?: boolean;
-    code: string
 }
 
 const Login: React.FC = () => {
 
     const navigate = useNavigate();
 
-    useEffect(() => {
-        sessionStorage.clear();
-    }, [])  //eslint-disable-line
-
     //表单数据
     const [form] = Form.useForm<FormState>();
 
     const [openAddUserModal, setOpenAddUserModal] = useState<boolean>(false);
+    const [options, setOptions] = useState<SelectProps['options']>([]);
 
-    const options: SelectProps['options'] = [
-        {
-            label: <><GithubOutlined /> ( GitHub ) / RogerPeng123 / my-notion</>,
-            value: 1
-        },
-        {
-            label: <>( Gitee ) / flayingoranges / test-git</>,
-            value: 2
+    useEffect(() => {
+        sessionStorage.clear();
+    }, [])  //eslint-disable-line
+
+    useEffect(() => {
+        if (!openAddUserModal) {
+            invoke<SysUser[]>('get_user_config_list').then((res: SysUser[]) => {
+                let option: SelectProps['options'] = [];
+                res.forEach((item: SysUser, index: number) => {
+                    let label;
+
+                    switch (item.type) {
+                        case 1:
+                            label = <><GithubOutlined /> ( GitHub ) / {item.owner} / {item.repo}</>
+                            break;
+                        case 2:
+                            label = <><GitlabFilled /> ( Gitee ) / {item.owner} / {item.repo}</>
+                            break;
+                        default:
+                            label = <></>
+                    }
+
+                    let val = item.id === null ? `user_list_${index}` : item.id;
+                    option?.push({
+                        label: label,
+                        value: val
+                    })
+                })
+                setOptions(option);
+            })
         }
-    ];
+    }, [openAddUserModal]); //eslint-disable-line
+
 
 
     const testRust = () => {
-        console.log('这里去调用rust代码')
-        getName().then(res => {
-            let appName = res.replace(/\s+/g, "");
-            
-            invoke<string>('generate_json', { appName: appName }).then(() => {
-                console.log('success')
-            })
+        invoke<string>('generate_json').then(() => {
+            console.log('success')
         });
     }
 
@@ -79,10 +93,14 @@ const Login: React.FC = () => {
             const data: FormState = form.getFieldsValue();
             console.log(data)
 
-            sessionStorage.setItem("token", "萧十一郎");
+            invoke<SysUser>('user_login', { username: data.id, password: data.password }).then(res => {
+                sessionStorage.setItem("token", res.id!);
 
-            message.success('🎉🎉🎉 登录成功', 1);
-            navigate('/dashboard');
+                message.success('🎉🎉🎉 登录成功', 1);
+                navigate('/dashboard');
+            }).catch(err => message.error(err))
+
+
         })
     }
 
@@ -104,8 +122,8 @@ const Login: React.FC = () => {
                 >
 
                     <Form.Item
-                        name="username"
-                        rules={[{ required: true, message: "请输入账号" }]}
+                        name="id"
+                        rules={[{ required: true, message: "请选择您的用户" }]}
                     >
                         <Select
                             placeholder={'请选择您的用户'}
