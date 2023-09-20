@@ -6,10 +6,15 @@ use bcrypt::{hash, verify, DEFAULT_COST};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use tauri::{api::path, Config};
+use tauri::{api::path, utils::assets::EmbeddedAssets, Config};
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug,Clone)]
+// 创建并返回 Tauri 上下文信息
+fn create_tauri_context() -> tauri::Context<EmbeddedAssets> {
+    tauri::generate_context!()
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct SysUser {
     id: Option<String>,
     r#type: i32,
@@ -51,11 +56,10 @@ fn user_login(username: String, password: String) -> Result<SysUser, String> {
     }
 
     if let Some(sys_user) = sys_user_option.as_deref() {
-
         let verify_password = match verify(password, &sys_user.password) {
             Ok(_) => true,
-            Err(_) => false
-        }; 
+            Err(_) => false,
+        };
 
         if verify_password {
             return Ok(sys_user.clone());
@@ -109,6 +113,8 @@ fn get_user_config_list() -> Vec<SysUser> {
 }
 
 fn main() {
+    let context = create_tauri_context();
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             add_user_info,
@@ -116,13 +122,13 @@ fn main() {
             get_user_config_list,
             user_login,
         ])
-        .run(tauri::generate_context!())
+        .run(context)
         .expect("error while running tauri application");
 }
 
 // 获取应用的data地址
 fn get_data_path() -> PathBuf {
-    let app = tauri::generate_context!();
+    let app = create_tauri_context();
     let app_name = app.config().package.product_name.as_ref().unwrap();
 
     let config = Config::default();
