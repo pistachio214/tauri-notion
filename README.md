@@ -11,7 +11,7 @@
 
 ## 开发计划
 
-1. ~~ 基础框架 `react` + `typescript` + `antd` + `rust` 搭建  ~~
+1. ~~基础框架 `react` + `typescript` + `antd` + `rust` 搭建 ~~
 2. ~~ `Login`、`Home` 界面框架构建 ~~
 3. ~~ 主界面的MarkDown编辑器搭建 ~~
 4. ~~ 编辑器基本操作开发 ~~
