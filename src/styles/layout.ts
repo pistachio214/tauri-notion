@@ -9,18 +9,17 @@ export const LogoContainer = styled.div`
   align-items: center;
   margin-top: 5px;
   margin-bottom: 1vh;
-
-  &:hover {
-    /* background: #E8E8E6; */
-  }
   
   .logo-notion {
     width: 20px;
     height: 20px;
     margin-right: 0.5vh;
     background-color: #D8D8D5;
-    font-size: 2px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .dropdown {
