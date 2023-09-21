@@ -47,6 +47,8 @@ const Dashboard: React.FC = () => {
             return;
         }
 
+        console.log(value);
+
         setSaveLoading(false);
 
         message.info("保存中.....");
