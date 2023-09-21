@@ -8,3 +8,7 @@
 - [React](https://react.dev/)
 - [Redux](https://www.redux.org.cn/)
 - [Rust](https://www.rust-lang.org/)
+
+## 开发计划
+
+1. 基础框架 `react` + `typescript` + `antd` + `rust` 搭建 
