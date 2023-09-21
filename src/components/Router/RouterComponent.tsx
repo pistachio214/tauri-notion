@@ -16,15 +16,22 @@ const RouterComponent: React.FC = () => {
             <Suspense fallback={<Spin />}>
                 <HashRouter>
                     <Routes>
-                        <Route path={"/"} element={
-                            sessionStorage.getItem("token") === "萧十一郎" ?
-                                <Dashboard /> : <Login />
-                        }
-                        />
+                        {/* <Route
+                            path={"/"}
+                            element={
+                                sessionStorage.getItem("token") === "萧十一郎" ?
+                                    <Dashboard /> : <Login />
+                            }
+                        /> */}
                         <Route path={"/login"} element={<Login />} />
 
-                        <Route path="/" element={<LayoutComponent />}>
+                        {/* <Route path="/" element={<LayoutComponent />}>
                             <Route path={"/dashboard"} element={<Dashboard />} />
+                        </Route> */}
+
+                        
+                        <Route path="/" element={<LayoutComponent />}>
+                            <Route path={"/"} element={<Dashboard />} />
                         </Route>
 
 

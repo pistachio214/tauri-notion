@@ -1,25 +1,82 @@
 import styled from "styled-components";
+import { Layout } from 'antd';
 
+const { Content } = Layout;
 
 export const LogoContainer = styled.div`
-  height: 80px;
   display: flex;
-  flex-direction: row;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  gap: 1vh;
+  margin-top: 5px;
   margin-bottom: 1vh;
-  margin-top: 2vh;
-  
-  .logo-img {
-    object-fit: cover;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
+
+  &:hover {
+    /* background: #E8E8E6; */
   }
   
-  span {
+  .logo-notion {
+    width: 20px;
+    height: 20px;
+    margin-right: 0.5vh;
+    background-color: #D8D8D5;
+    font-size: 2px;
+    font-weight: 500;
+  }
+
+  .dropdown {
+    width: 100%;
+    padding-left: 2vh;
+    margin-bottom: 1vh;
+    padding-top: 1vh;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .operitem-botton {
+    width: 100%;
+    padding-left: 2vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .new-page {
+      font-size: 12px;
+    }
+  }
+  
+  .username {
+    color: #37352F;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 14px;
   }
 `;
+
+export const LayoutOperation = styled.div`
+  height: 45px;
+  background: #FFFFFF;
+  position: fixed;
+  top: 0;
+  left: 300px;
+  right: 0;
+  z-index: 999;
+
+
+  .layout-operation-container {
+    height: 100%;
+    padding-left: 3vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1vh;
+  }
+  
+  
+`
+
+export const LayoutContent = styled(Content)`
+  padding-top: 35px;
+  margin: 0;
+  overflow: initial;
+`

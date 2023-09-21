@@ -1,15 +1,13 @@
-import React, { useState } from 'react';
-import { Button, theme } from 'antd';
-import {
-    EditOutlined,
-    DeleteOutlined,
-    FileAddOutlined
-} from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { theme } from 'antd';
 import MarkDownEditor from "for-editor";
+import { shallowEqual } from "react-redux";
 
 import { MarkDownContainer } from '../../styles/dashboard';
-import defaultSettings from '../../defaultSettings';
 import { message } from '../../components/Antd/EscapeAntd';
+import { useAppSelector } from '../../redux/hook';
+import { MarkDownEditorState } from '../../types/editor';
+import { RootState } from '../../redux/store';
 
 
 const Dashboard: React.FC = () => {
@@ -17,10 +15,32 @@ const Dashboard: React.FC = () => {
         token: { colorBgContainer },
     } = theme.useToken();
 
-    const [mdContent, setMdContent] = useState<string>(`# ${defaultSettings.title}`);
-    const [subfield, setSubfield] = useState<boolean>(false);
+    const editorState: MarkDownEditorState = useAppSelector((state: RootState) => ({ ...state.editor }), shallowEqual);
+
+    const [mdContent, setMdContent] = useState<string>('');
 
     const [saveLoading, setSaveLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        console.log(editorState)
+        switch (editorState.state) {
+            case 1:
+                showEditor();
+                break;
+            case 2:
+                showEditor();
+                break;
+            case 3:
+                setMdContent('');
+                break;
+            default:
+        }
+    }, [editorState.state])
+
+    const showEditor = () => {
+        // 后续要根据选择，进行内容的注入，目前先就这样吧
+        setMdContent(`# 小楼一夜听春雨`)
+    }
 
     const handleEditorSave = (value: string) => {
         if (!saveLoading) {
@@ -41,34 +61,6 @@ const Dashboard: React.FC = () => {
 
     return (
         <MarkDownContainer bgcolor={colorBgContainer}>
-            <div className='operation-container'>
-                <Button
-                    type="text"
-                    icon={<FileAddOutlined />}
-                    onClick={() => {
-                        setSubfield(true)
-                    }}
-                >
-                    添加
-                </Button>
-                <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => {
-                        setSubfield(!subfield)
-                    }}
-                >
-                    编辑
-                </Button>
-                <Button
-                    type="text"
-                    icon={<DeleteOutlined />}
-                    danger
-                >
-                    删除
-                </Button>
-            </div>
-
             <div className='markdown-container'>
                 <MarkDownEditor
                     key={'md-editor-edit'}
@@ -83,7 +75,7 @@ const Dashboard: React.FC = () => {
                     // @ts-ignore
                     lineNum={false}
                     preview={true}
-                    subfield={subfield}
+                    subfield={editorState.subfield}
                     language={'zh-CN'}
                     style={{
                         height: '95vh',

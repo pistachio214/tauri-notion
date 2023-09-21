@@ -1,12 +1,10 @@
 import styled from "styled-components";
 
 export const MarkDownContainer = styled.div<{bgcolor: string}>`
-  padding: 24;
+  padding: 0 8vh;
   text-align: 'center';
   background: ${(props: {bgcolor: string}) => props.bgcolor};
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  min-height: 95vh;
   
   .operation-container {
     height: 40px;
@@ -15,7 +13,7 @@ export const MarkDownContainer = styled.div<{bgcolor: string}>`
     padding-right: 2vh;
     gap: 1vh;
     justify-content: right;
-    border-bottom: 1px solid #ddd;
+    /* border-bottom: 1px solid #ddd; */
   }
   
   .markdown-container {
@@ -23,6 +21,10 @@ export const MarkDownContainer = styled.div<{bgcolor: string}>`
 
     .for-panel.for-editor-preview.for-active {
       border-left: 1px solid #ddd;
+    }
+
+    .for-preview.for-markdown-preview{
+      background: ${(props: {bgcolor: string}) => props.bgcolor};
     }
   }
 `
