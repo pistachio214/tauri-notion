@@ -10,17 +10,10 @@
 - [Rust](https://www.rust-lang.org/)
 
 ## 开发计划
-1. ~~基础框架 `react` + `typescript` + `antd` + `rust` 搭建 ~~
-2. ~~ `Login`、`Home` 界面框架构建 ~~
+1. ~~基础框架 react + typescript + antd + rust 搭建 ~~
+2. ~~ Login、Home 界面框架构建 ~~
 3. ~~ 主界面的MarkDown编辑器搭建 ~~
 4. ~~ 编辑器基本操作开发 ~~
 5. 侧边栏的 笔记菜单开发
 6. ~~ rust处理账号选择的问题 ~~
 7. ~~ rust本机存储账号信息数据 ~~
-
-
-## 后续计划
-1. ~~基础框架 `react` + `typescript` + `antd` + `rust` 搭建~~
-2. ~~图片文件上传问题~~
-3. ~~主页右上角 管理员点击个人信息编辑操作问题~~
-4. ~~dashboard页面,丰富一下,搞点图表啥的上去~~
