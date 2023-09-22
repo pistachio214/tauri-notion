@@ -1,20 +1,14 @@
 import React from 'react';
 import {
+    FolderOutlined,
     EyeOutlined,
     EditOutlined,
     PlusCircleOutlined,
     SettingOutlined,
-    AppstoreOutlined,
-    BarChartOutlined,
-    CloudOutlined,
-    ShopOutlined,
-    TeamOutlined,
-    UploadOutlined,
-    UserOutlined,
-    VideoCameraOutlined,
     PlusOutlined,
     FolderOpenOutlined,
     FileTextOutlined,
+    OrderedListOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Button, Layout, Menu, Dropdown, Space } from 'antd';
@@ -29,30 +23,59 @@ import { LogoContainer, LayoutContent, LayoutOperation } from '../../styles/layo
 import { RootState } from '../../redux/store';
 import { MarkDownEditorState } from '../../types/editor';
 
-
 const { Sider } = Layout;
 
-const items: MenuProps['items'] = [
-    UserOutlined,
-    VideoCameraOutlined,
-    UploadOutlined,
-    BarChartOutlined,
-    CloudOutlined,
-    AppstoreOutlined,
-    TeamOutlined,
-    ShopOutlined,
-].map((icon, index) => ({
-    key: String(index + 1),
-    icon: React.createElement(icon),
-    label: `nav ${index + 1}`,
-    children: [
-        {
-            key: `${String(index + 100)}`,
-            icon: React.createElement(icon),
-            label: `nav children ${index + 1}`,
-        }
-    ]
-}));
+const menuItems: MenuProps['items'] = [
+    {
+        key: String(1),
+        icon: <FolderOutlined />,
+        label: `技术贴`,
+        children: [
+            {
+                key: `1-1`,
+                icon: <OrderedListOutlined />,
+                label: `Rust权威指南`,
+                children: [
+                    {
+                        key: `1-1-1`,
+                        icon: <FileTextOutlined />,
+                        label: `将值传递后触发移动或复制问题`,
+                    }
+
+                ]
+            },
+            {
+                key: `1-2`,
+                icon: <OrderedListOutlined />,
+                label: `Lunix`,
+                children: [
+                    {
+                        key: `1-2-1`,
+                        icon: <FileTextOutlined />,
+                        label: `1. 链接服务器`,
+                    },
+                    {
+                        key: `1-2-2`,
+                        icon: <FileTextOutlined />,
+                        label: `2. 简单命令行`,
+                    },
+                    {
+                        key: `1-2-3`,
+                        icon: <FileTextOutlined />,
+                        label: `2. 删除文件`,
+                    },
+                    {
+                        key: `1-2-4`,
+                        icon: <FileTextOutlined />,
+                        label: `2. 删除文件`,
+                    },
+                ]
+            }
+        ]
+    }
+
+
+];
 
 const App: React.FC = () => {
 
@@ -81,6 +104,14 @@ const App: React.FC = () => {
         dispatch(setMarkDownEditorSubfield(true));
         dispatch(setMarkDownEditorState(3));
     }
+
+    const onClick: MenuProps['onClick'] = (e) => {
+        console.log(e.key);
+    };
+
+    const onSelect: MenuProps['onSelect'] = (e) => {
+        console.log(e.key);
+    };
 
     return (
         <Layout hasSider>
@@ -136,12 +167,25 @@ const App: React.FC = () => {
                 <Menu
                     theme="light"
                     mode="inline"
-                    defaultSelectedKeys={['4']}
-                    items={items}
+                    defaultSelectedKeys={[]}
+                    expandIcon={(props) => {
+                        if (props.isOpen) {
+                            return <FolderOpenOutlined />;
+                        } else {
+                            return (
+                                <FolderOutlined />
+                            )
+                        }
+                    }}
+                    // items={items}
+                    items={menuItems}
                     style={{
                         background: '#F7F7F5',
+                        width: 300,
                         borderRight: 'none',
                     }}
+                    onClick={onClick}
+                    onSelect={onSelect}
                 />
 
             </Sider>
