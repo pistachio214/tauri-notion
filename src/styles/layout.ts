@@ -3,6 +3,29 @@ import { Layout } from 'antd';
 
 const { Content } = Layout;
 
+
+export const LayoutMenuContainer = styled.div`
+  .menu-item-container {
+    border: 1px solid red;
+
+    .menu-item-title {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      padding-left: 2vh;
+
+      &:hover {
+        color: rgba(0, 0, 0, 0.88);
+        background-color: rgba(0, 0, 0, 0.06);
+      }
+    }
+
+    .item-title {
+      padding-left: +=2vh;
+    }
+  }
+`
+
 export const LogoContainer = styled.div`
   display: flex;
   flex-direction: column;

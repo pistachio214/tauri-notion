@@ -22,60 +22,61 @@ import { setMarkDownEditorState, setMarkDownEditorSubfield } from '../../redux/s
 import { LogoContainer, LayoutContent, LayoutOperation } from '../../styles/layout';
 import { RootState } from '../../redux/store';
 import { MarkDownEditorState } from '../../types/editor';
+import LayoutMenuComponent from './LayoutMenuComponent';
 
 const { Sider } = Layout;
 
-const menuItems: MenuProps['items'] = [
-    {
-        key: String(1),
-        icon: <FolderOutlined />,
-        label: `技术贴`,
-        children: [
-            {
-                key: `1-1`,
-                icon: <OrderedListOutlined />,
-                label: `Rust权威指南`,
-                children: [
-                    {
-                        key: `1-1-1`,
-                        icon: <FileTextOutlined />,
-                        label: `将值传递后触发移动或复制问题`,
-                    }
+// const menuItems: MenuProps['items'] = [
+//     {
+//         key: String(1),
+//         icon: <FolderOutlined />,
+//         label: `技术贴`,
+//         children: [
+//             {
+//                 key: `1-1`,
+//                 icon: <OrderedListOutlined />,
+//                 label: `Rust权威指南`,
+//                 children: [
+//                     {
+//                         key: `1-1-1`,
+//                         icon: <FileTextOutlined />,
+//                         label: `将值传递后触发移动或复制问题`,
+//                     }
 
-                ]
-            },
-            {
-                key: `1-2`,
-                icon: <OrderedListOutlined />,
-                label: `Lunix`,
-                children: [
-                    {
-                        key: `1-2-1`,
-                        icon: <FileTextOutlined />,
-                        label: `1. 链接服务器`,
-                    },
-                    {
-                        key: `1-2-2`,
-                        icon: <FileTextOutlined />,
-                        label: `2. 简单命令行`,
-                    },
-                    {
-                        key: `1-2-3`,
-                        icon: <FileTextOutlined />,
-                        label: `2. 删除文件`,
-                    },
-                    {
-                        key: `1-2-4`,
-                        icon: <FileTextOutlined />,
-                        label: `2. 删除文件`,
-                    },
-                ]
-            }
-        ]
-    }
+//                 ]
+//             },
+//             {
+//                 key: `1-2`,
+//                 icon: <OrderedListOutlined />,
+//                 label: `Lunix`,
+//                 children: [
+//                     {
+//                         key: `1-2-1`,
+//                         icon: <FileTextOutlined />,
+//                         label: `1. 链接服务器`,
+//                     },
+//                     {
+//                         key: `1-2-2`,
+//                         icon: <FileTextOutlined />,
+//                         label: `2. 简单命令行`,
+//                     },
+//                     {
+//                         key: `1-2-3`,
+//                         icon: <FileTextOutlined />,
+//                         label: `2. 删除文件`,
+//                     },
+//                     {
+//                         key: `1-2-4`,
+//                         icon: <FileTextOutlined />,
+//                         label: `2. 删除文件`,
+//                     },
+//                 ]
+//             }
+//         ]
+//     }
 
 
-];
+// ];
 
 const App: React.FC = () => {
 
@@ -164,7 +165,9 @@ const App: React.FC = () => {
                     </Button>
                 </LogoContainer>
 
-                <Menu
+                <LayoutMenuComponent />
+
+                {/* <Menu
                     theme="light"
                     mode="inline"
                     defaultSelectedKeys={[]}
@@ -186,7 +189,7 @@ const App: React.FC = () => {
                     }}
                     onClick={onClick}
                     onSelect={onSelect}
-                />
+                /> */}
 
             </Sider>
             <Layout className="site-layout" style={{ marginLeft: 300, height: '100%' }}>
