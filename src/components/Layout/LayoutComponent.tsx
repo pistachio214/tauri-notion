@@ -1,17 +1,16 @@
 import React from 'react';
 import {
-    FolderOutlined,
+    FolderOpenOutlined,
+    FileTextOutlined,
     EyeOutlined,
     EditOutlined,
     PlusCircleOutlined,
     SettingOutlined,
     PlusOutlined,
-    FolderOpenOutlined,
-    FileTextOutlined,
-    OrderedListOutlined,
+    DeleteOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Button, Layout, Menu, Dropdown, Space } from 'antd';
+import { Button, Layout, Dropdown, Space } from 'antd';
 import { shallowEqual } from "react-redux";
 
 import { Outlet } from 'react-router';
@@ -25,58 +24,6 @@ import { MarkDownEditorState } from '../../types/editor';
 import LayoutMenuComponent from './LayoutMenuComponent';
 
 const { Sider } = Layout;
-
-// const menuItems: MenuProps['items'] = [
-//     {
-//         key: String(1),
-//         icon: <FolderOutlined />,
-//         label: `技术贴`,
-//         children: [
-//             {
-//                 key: `1-1`,
-//                 icon: <OrderedListOutlined />,
-//                 label: `Rust权威指南`,
-//                 children: [
-//                     {
-//                         key: `1-1-1`,
-//                         icon: <FileTextOutlined />,
-//                         label: `将值传递后触发移动或复制问题`,
-//                     }
-
-//                 ]
-//             },
-//             {
-//                 key: `1-2`,
-//                 icon: <OrderedListOutlined />,
-//                 label: `Lunix`,
-//                 children: [
-//                     {
-//                         key: `1-2-1`,
-//                         icon: <FileTextOutlined />,
-//                         label: `1. 链接服务器`,
-//                     },
-//                     {
-//                         key: `1-2-2`,
-//                         icon: <FileTextOutlined />,
-//                         label: `2. 简单命令行`,
-//                     },
-//                     {
-//                         key: `1-2-3`,
-//                         icon: <FileTextOutlined />,
-//                         label: `2. 删除文件`,
-//                     },
-//                     {
-//                         key: `1-2-4`,
-//                         icon: <FileTextOutlined />,
-//                         label: `2. 删除文件`,
-//                     },
-//                 ]
-//             }
-//         ]
-//     }
-
-
-// ];
 
 const App: React.FC = () => {
 
@@ -106,13 +53,7 @@ const App: React.FC = () => {
         dispatch(setMarkDownEditorState(3));
     }
 
-    const onClick: MenuProps['onClick'] = (e) => {
-        console.log(e.key);
-    };
-
-    const onSelect: MenuProps['onSelect'] = (e) => {
-        console.log(e.key);
-    };
+    const editMarkDownDelete = () => { }
 
     return (
         <Layout hasSider>
@@ -131,14 +72,14 @@ const App: React.FC = () => {
                 <LogoContainer>
                     <Dropdown
                         className='dropdown'
-                        placement={'bottomRight'}
+                        // placement={'bottomRight'}
                         menu={{
                             items: dropdownItems,
                             onClick: (e: { key: string }) => console.log(e)
                         }}
                         trigger={['click']}
                         overlayStyle={{
-                            width: '100px',
+                            // width: '100px',
                             background: '#FBFAF9'
                         }}
                     >
@@ -166,30 +107,6 @@ const App: React.FC = () => {
                 </LogoContainer>
 
                 <LayoutMenuComponent />
-
-                {/* <Menu
-                    theme="light"
-                    mode="inline"
-                    defaultSelectedKeys={[]}
-                    expandIcon={(props) => {
-                        if (props.isOpen) {
-                            return <FolderOpenOutlined />;
-                        } else {
-                            return (
-                                <FolderOutlined />
-                            )
-                        }
-                    }}
-                    // items={items}
-                    items={menuItems}
-                    style={{
-                        background: '#F7F7F5',
-                        width: 300,
-                        borderRight: 'none',
-                    }}
-                    onClick={onClick}
-                    onSelect={onSelect}
-                /> */}
 
             </Sider>
             <Layout className="site-layout" style={{ marginLeft: 300, height: '100%' }}>
@@ -227,6 +144,15 @@ const App: React.FC = () => {
                                 />
                             ) : null
                         }
+
+                        <Button
+                            icon={<DeleteOutlined />}
+                            size='small'
+                            type='text'
+                            danger
+                            title='删除'
+                            onClick={() => editMarkDownDelete()}
+                        />
 
                         <Button
                             icon={<FolderOpenOutlined />}
