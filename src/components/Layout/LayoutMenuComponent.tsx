@@ -62,7 +62,9 @@ const data: MenuItemType[] = [
 
 const buildMenuItem = () => {
 
-    // data
+    data.forEach((item: MenuItemType, index: number) => { 
+        item.
+    })
 
 }
 
