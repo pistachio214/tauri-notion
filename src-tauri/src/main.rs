@@ -15,7 +15,23 @@ fn create_tauri_context() -> tauri::Context<EmbeddedAssets> {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct SysUser {
+struct MenuUserType {
+    id: String,
+    items: Vec<MenuItemType>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct MenuItemType {
+    id: String,
+    r#type: i32,
+    label: String,
+    open: bool,
+    icon: String,
+    children: Option<Vec<MenuItemType>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct SysUserType {
     id: Option<String>,
     r#type: i32,
     access_token: String,
@@ -32,14 +48,54 @@ fn generate_json() -> () {
     // let password = "xiaofeng";
 }
 
+// TODO 获取某个用户的菜单列表
+#[tauri::command]
+fn menu_list(id: String) -> Result<Vec<MenuItemType>, String> {
+    println!("id= {}", id);
+    let file: String = String::from("user_menu.json");
+
+    find_dir_and_file(&file, "[]");
+
+    let file_path = get_data_file(file);
+
+    // 上一步保证了文件必存在,此时获取文件内容毫无压力
+    let user_menu = tauri::api::file::read_string(file_path.clone()).unwrap();
+
+    let user_menu_array: Vec<MenuUserType> = match serde_json::from_str(&user_menu) {
+        Ok(res) => res,
+        Err(_) => Vec::new(),
+    };
+
+    if user_menu_array.len() > 0 {
+        let mut menu_item: Option<Vec<MenuItemType>> = None;
+
+        for menu_user in user_menu_array.iter() {
+            if menu_user.id == id {
+                menu_item = Some(menu_user.items.clone());
+            }
+        }
+
+        if menu_item.is_none() {
+            return Ok(Vec::new());
+        }
+
+        return Ok(menu_item.unwrap());
+    } else {
+        return Err(
+            "请同步远端Git仓库的menu数据,或者您确定远端仓库没有创建菜单数据，那么请 New page"
+                .to_string(),
+        );
+    }
+}
+
 /**
  * 用户登录操作
  */
 #[tauri::command]
-fn user_login(username: String, password: String) -> Result<SysUser, String> {
-    let user_list: Vec<SysUser> = get_user_config_list();
+fn user_login(username: String, password: String) -> Result<SysUserType, String> {
+    let user_list: Vec<SysUserType> = get_user_config_list();
 
-    let mut sys_user_option: Option<&SysUser> = None;
+    let mut sys_user_option: Option<&SysUserType> = None;
     for user in user_list.iter() {
         let id = match &user.id {
             Some(id) => id,
@@ -75,8 +131,8 @@ fn user_login(username: String, password: String) -> Result<SysUser, String> {
  * 创建新的用户数据到本地存储
  */
 #[tauri::command]
-fn add_user_info(mut data: SysUser) -> () {
-    let mut user_data_array: Vec<SysUser> = get_user_config_list();
+fn add_user_info(mut data: SysUserType) -> () {
+    let mut user_data_array: Vec<SysUserType> = get_user_config_list();
 
     data.id = Some(Uuid::new_v4().to_string());
     data.access_token = base64_url::encode(&data.access_token);
@@ -94,7 +150,7 @@ fn add_user_info(mut data: SysUser) -> () {
  * 获取本地存储的用户账号配置信息
  */
 #[tauri::command]
-fn get_user_config_list() -> Vec<SysUser> {
+fn get_user_config_list() -> Vec<SysUserType> {
     let file: String = String::from("user_data.json");
 
     find_dir_and_file(&file, "[]");
@@ -104,7 +160,7 @@ fn get_user_config_list() -> Vec<SysUser> {
     // 上一步保证了文件必存在,此时获取文件内容毫无压力
     let user_data = tauri::api::file::read_string(file_path.clone()).unwrap();
 
-    let user_data_array: Vec<SysUser> = match serde_json::from_str(&user_data) {
+    let user_data_array: Vec<SysUserType> = match serde_json::from_str(&user_data) {
         Ok(res) => res,
         Err(_) => Vec::new(),
     };
@@ -121,6 +177,7 @@ fn main() {
             generate_json,
             get_user_config_list,
             user_login,
+            menu_list,
         ])
         .run(context)
         .expect("error while running tauri application");
