@@ -35,6 +35,12 @@ export default createGlobalStyle<{color: string}>`
       color: ${(props: {color: string}) => props.color};
     }
   }
+
+  .action-dropdown {
+    .ant-dropdown-menu-item,.ant-dropdown-menu-item-only-child {
+      padding: 0 !important;
+    }
+  }
 `
 
 //旋转样式

@@ -6,17 +6,67 @@ const { Content } = Layout;
 
 export const LayoutMenuContainer = styled.div`
   .menu-item-container {
-    border: 1px solid red;
+    /* border: 1px solid red; */
+    user-select: none;
+
+    .active {
+      color: rgba(0, 0, 0, 0.88);
+      background-color: rgba(0, 0, 0, 0.05);
+    }
 
     .menu-item-title {
       height: 30px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       padding-left: 2vh;
+      user-select: none !important;
+
+      .item-title {
+        display: flex;
+        flex-direction: row;
+
+      }
+
+      .menu-action-container {
+        padding-right: 1vh;
+        display: none;
+        
+        .action-item {
+          display: flex;
+          flex-direction: row;
+          gap: 3px;
+
+
+        }
+      }
+
+      .icon-style {
+        height: 20px;
+        width: 20px;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+      }
+      
+      .title {
+        margin-left: 0.5vh;
+      }
 
       &:hover {
         color: rgba(0, 0, 0, 0.88);
         background-color: rgba(0, 0, 0, 0.06);
+        cursor: pointer;
+
+        .menu-action-container {
+          display: block;
+        }
       }
     }
 
