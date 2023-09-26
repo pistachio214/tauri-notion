@@ -22,7 +22,6 @@ const Dashboard: React.FC = () => {
     const [saveLoading, setSaveLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        console.log(editorState)
         switch (editorState.state) {
             case 1:
                 showEditor();

@@ -10,6 +10,7 @@ import {
     GithubOutlined,
     GitlabFilled,
 } from "@ant-design/icons";
+import { AxiosResponse } from "axios";
 
 import { invoke } from '@tauri-apps/api/tauri'
 
@@ -29,6 +30,142 @@ import react_icon from "../../assets/react.svg";
 import defaultSettings from "./../../defaultSettings";
 import CreateUserModalComponent from "../../components/User/CreateUserModalComponent";
 import { SysUser } from "../../types/user";
+import { GiteeErrorResponse, GiteeFileContentRequest, GiteeFileContentResponse } from "../../types/gitee";
+import { getMenuList } from "../../api/gitee";
+
+interface MenuItemType {
+    id: string
+    type: number
+    label: string
+    open: boolean
+    icon?: React.ReactNode
+    children?: MenuItemType[]
+}
+
+const data: MenuItemType[] = [
+    {
+        id: "1",
+        type: 1,
+        label: "圆月弯刀",
+        open: false,
+        children: [
+            {
+                id: '1-1',
+                type: 2,
+                label: "小楼一夜听春雨",
+                open: false,
+                children: [
+                    {
+                        id: '1-1-1',
+                        type: 3,
+                        label: "第1场春雨",
+                        open: false,
+                        children: [
+                            {
+                                id: '1-1-1-1',
+                                type: 4,
+                                label: "测试更多的目录",
+                                open: false,
+                            }
+                        ]
+                    },
+                    {
+                        id: '1-1-2',
+                        type: 3,
+                        label: "第2场春雨",
+                        open: false,
+                    },
+                    {
+                        id: '1-1-3',
+                        type: 3,
+                        label: "第3场春雨",
+                        open: false,
+                    },
+                    {
+                        id: '1-1-4',
+                        type: 3,
+                        label: "第4场春雨",
+                        open: false,
+                    },
+                    {
+                        id: '1-1-5',
+                        type: 3,
+                        label: "第5场春雨",
+                        open: false,
+                    },
+                ]
+            },
+            {
+                id: '1-2',
+                type: 2,
+                label: "天外流星",
+                open: false,
+                children: [
+                    {
+                        id: '1-2-1',
+                        type: 3,
+                        label: "第1颗流星",
+                        open: false,
+                    },
+                    {
+                        id: '1-2-2',
+                        type: 3,
+                        label: "第2颗流星",
+                        open: false,
+                    },
+                    {
+                        id: '1-2-3',
+                        type: 3,
+                        label: "第3颗流星",
+                        open: false,
+                    },
+                ]
+            }
+        ]
+    },
+    {
+        id: "2",
+        type: 1,
+        label: "萧十一郎",
+        open: false,
+        children: [
+            {
+                id: '2-1',
+                type: 2,
+                label: "萧十一郎的红颜",
+                open: false,
+                children: [
+                    {
+                        id: '2-1-1',
+                        type: 3,
+                        label: "沈璧君",
+                        open: false,
+                    },
+                    {
+                        id: '2-1-2',
+                        type: 3,
+                        label: "风四娘",
+                        open: false,
+                    },
+                ]
+            },
+            {
+                id: '2-2',
+                type: 2,
+                label: "萧十一郎的武器",
+                open: false,
+                children: [
+                    {
+                        id: '2-2-1',
+                        type: 3,
+                        label: "割鹿刀",
+                        open: false,
+                    },
+                ]
+            }
+        ]
+    }
+];
 
 interface FormState {
     id: string;
@@ -46,6 +183,7 @@ const Login: React.FC = () => {
     const [options, setOptions] = useState<SelectProps['options']>([]);
 
     useEffect(() => {
+        console.log('进来了几次?')
         sessionStorage.clear();
     }, [])  //eslint-disable-line
 
@@ -79,17 +217,34 @@ const Login: React.FC = () => {
     }, [openAddUserModal]); //eslint-disable-line
 
 
+    const gitFileContent = () => {
+        let data: GiteeFileContentRequest = {
+            access_token: '04fe3dabb3769ded506d8122891a04fa',
+            ref: 'master',
+            owner: "flayingoranges",
+            repo: "test-git",
+            path: "user_menu.json"
+        };
+
+        getMenuList(data)
+            .then((res: AxiosResponse<GiteeFileContentResponse>) => {
+                if (res.data.content !== undefined && res.data.size > 0) {
+                    console.log(atob(res.data.content));
+                }
+
+            })
+            .catch((error: AxiosResponse<GiteeErrorResponse>) => {
+                console.log(error);
+            });
+    }
 
     const testRust = () => {
-        invoke<string>('generate_json').then(() => {
-            console.log('success')
-        });
+        console.log('push gitee')
     }
 
     const onFinish = () => {
         form.validateFields().then(async () => {
             const data: FormState = form.getFieldsValue();
-            console.log(data)
 
             invoke<SysUser>('user_login', { username: data.id, password: data.password })
                 .then(res => {

@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+
+import { Button, Dropdown } from "antd";
+import type { MenuProps } from 'antd';
 import {
     FolderOutlined,
     FileTextOutlined,
@@ -9,9 +12,13 @@ import {
     EllipsisOutlined,
 } from '@ant-design/icons';
 
+import { invoke } from '@tauri-apps/api/tauri'
+
 import { LayoutMenuContainer } from "../../styles/layout";
-import { Button, Dropdown } from "antd";
-import type { MenuProps } from 'antd';
+import { useAppDispatch } from "../../redux/hook";
+import { BreadcrumbOption } from "../../types/global";
+import { setBreadcrumbItems } from "../../redux/slice/breadcrumb";
+import { message } from "../Antd/EscapeAntd";
 
 interface MenuItemType {
     id: string
@@ -182,6 +189,8 @@ const items: MenuProps['items'] = [
 
 const LayoutMenuComponent: React.FC = () => {
 
+    const dispatch = useAppDispatch();
+
     const [menuDataArray, setMenuDataArray] = useState<MenuItemType[]>(data);
     const [menuArray, setMenuArray] = useState<MenuItemType[]>([]);
     const [selectKey, setSelectKey] = useState<String>('');
@@ -189,6 +198,20 @@ const LayoutMenuComponent: React.FC = () => {
     useEffect(() => {
         setMenuArray(buildItem(menuDataArray));
     }, [menuDataArray])
+
+    useEffect(() => {
+        getLocalhostMenuList();
+    }, [])
+
+    const getLocalhostMenuList = () => {
+        let id = sessionStorage.getItem("token")
+        invoke<MenuItemType[]>('menu_list', { id })
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => message.error(err));
+
+    }
 
     const buildItem = (data: MenuItemType[]) => {
         let res: MenuItemType[] = [];
@@ -265,6 +288,32 @@ const LayoutMenuComponent: React.FC = () => {
         return newData; // 返回整个被修改的数据副本
     }
 
+    // 构建面包屑的数据
+    const buildBreadcrumb = (ids: number[], data: MenuItemType[]) => {
+        const newData = [...data]; // 创建一个副本以保留原始数据的不可变性
+        let current = newData;
+        let breadcrumb: BreadcrumbOption[] = [];
+
+        for (const index of ids) {
+            if (current[index] && current[index].children) {
+                breadcrumb.push({
+                    label: current[index].label,
+                    isChildren: current[index] && current[index].children ? true : false
+                });
+                current = current[index].children!;
+            } else {
+                breadcrumb.push({
+                    label: current[index].label,
+                    isChildren: current[index] && current[index].children ? true : false
+                });
+
+                return breadcrumb; // 如果索引无效，则返回原始数据
+            }
+        }
+
+        return breadcrumb;
+    }
+
     const clickMenu = (id: string) => {
 
         let ids = findIndexById(menuDataArray, id, []);
@@ -289,6 +338,12 @@ const LayoutMenuComponent: React.FC = () => {
     }
 
     const clickMenuTitle = (menu: MenuItemType) => {
+        let ids = findIndexById(menuDataArray, menu.id, []);
+        let breadcrumb: BreadcrumbOption[] = buildBreadcrumb(ids, menuDataArray); // 构建面包屑数据
+        if (breadcrumb.length > 0) {
+            dispatch(setBreadcrumbItems(breadcrumb));
+        }
+
         setSelectKey(menu.id);
     }
 

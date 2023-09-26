@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    FolderOpenOutlined,
+    FolderOutlined,
     FileTextOutlined,
     EyeOutlined,
     EditOutlined,
@@ -10,7 +10,8 @@ import {
     DeleteOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Button, Layout, Dropdown, Space } from 'antd';
+import { Button, Layout, Dropdown, Space, Breadcrumb } from 'antd';
+import { ItemType } from 'antd/es/breadcrumb/Breadcrumb';
 import { shallowEqual } from "react-redux";
 
 import { Outlet } from 'react-router';
@@ -22,13 +23,12 @@ import { LogoContainer, LayoutContent, LayoutOperation } from '../../styles/layo
 import { RootState } from '../../redux/store';
 import { MarkDownEditorState } from '../../types/editor';
 import LayoutMenuComponent from './LayoutMenuComponent';
+import { BreadcrumbItemState, BreadcrumbOption } from '../../types/global';
+
 
 const { Sider } = Layout;
 
 const App: React.FC = () => {
-
-    const dispatch = useAppDispatch();
-    const editorState: MarkDownEditorState = useAppSelector((state: RootState) => ({ ...state.editor }), shallowEqual);
 
     const dropdownItems: MenuProps['items'] = [
         {
@@ -38,6 +38,44 @@ const App: React.FC = () => {
             )
         }
     ];
+
+
+    const dispatch = useAppDispatch();
+
+    const editorState: MarkDownEditorState = useAppSelector((state: RootState) => ({ ...state.editor }), shallowEqual);
+    const breadcrumbState: BreadcrumbItemState = useAppSelector((state: RootState) => ({ ...state.breadcrumb }), shallowEqual);
+
+    const [breadcrumbItems, setBreadcrumbItems] = useState<ItemType[]>([]);
+
+
+    useEffect(() => {
+        // 初始化面包屑
+        setBreadcrumbItems([]);
+    }, [])
+
+    useEffect(() => {
+        const { items } = breadcrumbState;
+
+        let option: ItemType[] = [];
+        items.forEach((item: BreadcrumbOption) => {
+            let itemType: ItemType = {
+                title: (
+                    <Button
+                        icon={item.isChildren ? <FolderOutlined /> : <FileTextOutlined />}
+                        size='small'
+                        type='text'
+                    >
+                        {item.label}
+                    </Button>
+                )
+            }
+
+            option.push(itemType);
+        })
+
+        setBreadcrumbItems(option);
+
+    }, [breadcrumbState.items])
 
     const editMarkDownEditor = (type: boolean) => {
         if (type) {
@@ -154,22 +192,10 @@ const App: React.FC = () => {
                             onClick={() => editMarkDownDelete()}
                         />
 
-                        <Button
-                            icon={<FolderOpenOutlined />}
-                            size='small'
-                            type='text'
-                            title='new tab Ctrl+T'
-                        >
-                            圆月弯刀
-                        </Button>
-                        /
-                        <Button
-                            icon={<FileTextOutlined />}
-                            size='small'
-                            type='text'
-                        >
-                            小楼一夜听春雨
-                        </Button>
+                        <Breadcrumb
+                            items={breadcrumbItems}
+                        />
+
                     </div>
                 </LayoutOperation>
 

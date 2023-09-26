@@ -43,9 +43,8 @@ struct SysUserType {
 
 // 测试案例,放在最上面,封测就删掉
 #[tauri::command]
-fn generate_json() -> () {
-    // let username = "xiaofeng";
-    // let password = "xiaofeng";
+fn generate_json() {
+    print!("到底进来没得哟?2");
 }
 
 // TODO 获取某个用户的菜单列表
@@ -87,6 +86,9 @@ fn menu_list(id: String) -> Result<Vec<MenuItemType>, String> {
         );
     }
 }
+
+// TOOD 试试能不能同步线上的菜单数据
+// fn syncGiteeMenu() {}
 
 /**
  * 用户登录操作
@@ -174,10 +176,10 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             add_user_info,
-            generate_json,
             get_user_config_list,
             user_login,
             menu_list,
+            generate_json,
         ])
         .run(context)
         .expect("error while running tauri application");
