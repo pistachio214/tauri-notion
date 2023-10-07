@@ -223,7 +223,7 @@ const Login: React.FC = () => {
             ref: 'master',
             owner: "flayingoranges",
             repo: "test-git",
-            path: "user_menu.json"
+            path: "menu.json"
         };
 
         getMenuList(data)
@@ -240,6 +240,7 @@ const Login: React.FC = () => {
 
     const testRust = () => {
         console.log('push gitee')
+        gitFileContent();
     }
 
     const onFinish = () => {

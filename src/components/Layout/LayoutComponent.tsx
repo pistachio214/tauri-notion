@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+    SyncOutlined,
     FolderOutlined,
     FileTextOutlined,
     EyeOutlined,
@@ -24,6 +25,10 @@ import { RootState } from '../../redux/store';
 import { MarkDownEditorState } from '../../types/editor';
 import LayoutMenuComponent from './LayoutMenuComponent';
 import { BreadcrumbItemState, BreadcrumbOption } from '../../types/global';
+import { getMenuList } from '../../api/gitee';
+import { GiteeFileContentRequest, GiteeFileContentResponse } from '../../types/gitee';
+import { AxiosResponse } from 'axios';
+import { message } from '../Antd/EscapeAntd';
 
 
 const { Sider } = Layout;
@@ -93,6 +98,27 @@ const App: React.FC = () => {
 
     const editMarkDownDelete = () => { }
 
+    const syncMenuAction = () => {
+        let data: GiteeFileContentRequest = {
+            access_token: '04fe3dabb3769ded506d8122891a04fa',
+            ref: 'master',
+            owner: 'flayingoranges',
+            repo: "test-git",
+            path: 'menu.php'
+        };
+
+        getMenuList(data).then((res: AxiosResponse<GiteeFileContentResponse | []>) => {
+            console.log(res.data);
+            const { data } = res;
+
+            if(Array.isArray(data)){
+                message.error("结果为空数组,数据不合法");
+            }
+
+            // console.log(typeof data);
+        })
+    }
+
     return (
         <Layout hasSider>
             <Sider
@@ -117,7 +143,7 @@ const App: React.FC = () => {
                         }}
                         trigger={['click']}
                         overlayStyle={{
-                            // width: '100px',
+                            width: '100px',
                             background: '#FBFAF9'
                         }}
                     >
@@ -140,6 +166,17 @@ const App: React.FC = () => {
                     >
                         <Space className='new-page'>
                             New page
+                        </Space>
+                    </Button>
+
+                    <Button
+                        className='operitem-botton'
+                        icon={<SyncOutlined twoToneColor={'#989793'} />}
+                        type='text'
+                        onClick={(_) => syncMenuAction()}
+                    >
+                        <Space className='new-page'>
+                            Sync Menu
                         </Space>
                     </Button>
                 </LogoContainer>

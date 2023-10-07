@@ -1,9 +1,9 @@
 import styled from "styled-components";
 
-export const MarkDownContainer = styled.div<{bgcolor: string}>`
+export const MarkDownContainer = styled.div<{color: string}>`
   padding: 0 8vh;
   text-align: 'center';
-  background: ${(props: {bgcolor: string}) => props.bgcolor};
+  background: ${(props: {color: string}) => props.color};
   min-height: 95vh;
   
   .operation-container {
@@ -24,7 +24,7 @@ export const MarkDownContainer = styled.div<{bgcolor: string}>`
     }
 
     .for-preview.for-markdown-preview{
-      background: ${(props: {bgcolor: string}) => props.bgcolor};
+      background: ${(props: {color: string}) => props.color};
     }
   }
 `

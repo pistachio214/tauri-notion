@@ -61,7 +61,7 @@ const Dashboard: React.FC = () => {
     }
 
     return (
-        <MarkDownContainer bgcolor={colorBgContainer}>
+        <MarkDownContainer color={colorBgContainer}>
             <div className='markdown-container'>
                 <MarkDownEditor
                     key={'md-editor-edit'}
