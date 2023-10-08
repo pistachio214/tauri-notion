@@ -2,7 +2,7 @@ import React, {
     Suspense
 } from "react";
 import { Spin } from "antd";
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import LayoutComponent from './../Layout/LayoutComponent';
 
@@ -19,8 +19,10 @@ const RouterComponent: React.FC = () => {
                         <Route
                             path={"/"}
                             element={
-                                sessionStorage.getItem("token") ?
-                                    <Dashboard /> : <Login />
+                                // sessionStorage.getItem("token") ?
+                                //     <Dashboard /> : <Login />
+
+                                <Navigate to={'/dashboard'} />
                             }
                         />
                         <Route path={"/login"} element={<Login />} />

@@ -100,10 +100,12 @@ export const LogoContainer = styled.div`
     padding-left: 2vh;
     margin-bottom: 1vh;
     padding-top: 1vh;
+    padding-bottom: 1vh;
     height: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
+    
   }
 
   .operitem-botton {
@@ -134,7 +136,6 @@ export const LayoutOperation = styled.div`
   right: 0;
   z-index: 999;
 
-
   .layout-operation-container {
     height: 100%;
     padding-left: 3vh;
@@ -143,12 +144,20 @@ export const LayoutOperation = styled.div`
     align-items: center;
     gap: 1vh;
   }
-  
-  
 `
 
 export const LayoutContent = styled(Content)`
-  padding-top: 35px;
   margin: 0;
+  height: 100%;
   overflow: initial;
+`
+
+export const LayoutSettingTabsContainer = styled.div`
+  margin-top: 2vh;
+
+  .ant-tabs-nav-wrap {
+    .ant-tabs-tab {
+      padding-top: 0px;
+    }
+  }
 `

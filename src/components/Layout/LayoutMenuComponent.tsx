@@ -12,7 +12,7 @@ import {
     EllipsisOutlined,
 } from '@ant-design/icons';
 
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/tauri';
 
 import { LayoutMenuContainer } from "../../styles/layout";
 import { useAppDispatch } from "../../redux/hook";
@@ -25,6 +25,7 @@ interface MenuItemType {
     type: number
     label: string
     open: boolean
+    content?: string
     icon?: React.ReactNode
     children?: MenuItemType[]
 }
@@ -204,8 +205,7 @@ const LayoutMenuComponent: React.FC = () => {
     }, [])
 
     const getLocalhostMenuList = () => {
-        let id = sessionStorage.getItem("token")
-        invoke<MenuItemType[]>('menu_list', { id })
+        invoke<MenuItemType[]>('menu_list')
             .then(res => {
                 console.log(res);
             })

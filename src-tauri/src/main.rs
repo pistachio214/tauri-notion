@@ -26,7 +26,6 @@ struct MenuItemType {
     r#type: i32,
     label: String,
     open: bool,
-    icon: String,
     children: Option<Vec<MenuItemType>>,
 }
 
@@ -47,10 +46,36 @@ fn generate_json() {
     print!("到底进来没得哟?2");
 }
 
+// 新增用户的菜单列表数据
+#[tauri::command]
+fn add_menu_list() -> Result<Vec<MenuItemType>, String> {
+    let file: String = String::from("user_menu_temp.json");
+
+    find_dir_and_file(&file, "[]");
+
+    let file_path = get_data_file(file);
+
+    // 上一步保证了文件必存在,此时获取文件内容毫无压力
+    let user_menu = tauri::api::file::read_string(file_path.clone()).unwrap();
+
+    let user_menu_array: Vec<MenuItemType> = match serde_json::from_str(&user_menu) {
+        Ok(res) => res,
+        Err(_) => Vec::new(),
+    };
+
+    if user_menu_array.len() > 0 {
+        return Ok(user_menu_array);
+    } else {
+        return Err(
+            "请同步远端Git仓库的menu数据,或者您确定远端仓库没有创建菜单数据，那么请 New page"
+                .to_string(),
+        );
+    }
+}
+
 // TODO 获取某个用户的菜单列表
 #[tauri::command]
-fn menu_list(id: String) -> Result<Vec<MenuItemType>, String> {
-    println!("id= {}", id);
+fn menu_list() -> Result<Vec<MenuItemType>, String> {
     let file: String = String::from("user_menu.json");
 
     find_dir_and_file(&file, "[]");
@@ -60,25 +85,14 @@ fn menu_list(id: String) -> Result<Vec<MenuItemType>, String> {
     // 上一步保证了文件必存在,此时获取文件内容毫无压力
     let user_menu = tauri::api::file::read_string(file_path.clone()).unwrap();
 
-    let user_menu_array: Vec<MenuUserType> = match serde_json::from_str(&user_menu) {
+    let user_menu_array: Vec<MenuItemType> = match serde_json::from_str(&user_menu) {
         Ok(res) => res,
         Err(_) => Vec::new(),
     };
 
     if user_menu_array.len() > 0 {
-        let mut menu_item: Option<Vec<MenuItemType>> = None;
 
-        for menu_user in user_menu_array.iter() {
-            if menu_user.id == id {
-                menu_item = Some(menu_user.items.clone());
-            }
-        }
-
-        if menu_item.is_none() {
-            return Ok(Vec::new());
-        }
-
-        return Ok(menu_item.unwrap());
+        return Ok(user_menu_array);
     } else {
         return Err(
             "请同步远端Git仓库的menu数据,或者您确定远端仓库没有创建菜单数据，那么请 New page"
@@ -175,6 +189,7 @@ fn main() {
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
+            add_menu_list,
             add_user_info,
             get_user_config_list,
             user_login,

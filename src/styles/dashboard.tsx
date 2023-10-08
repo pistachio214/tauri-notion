@@ -4,7 +4,8 @@ export const MarkDownContainer = styled.div<{color: string}>`
   padding: 0 8vh;
   text-align: 'center';
   background: ${(props: {color: string}) => props.color};
-  min-height: 95vh;
+  /* min-height: 96.32vh; */
+  height: 100%;
   
   .operation-container {
     height: 40px;
@@ -17,7 +18,7 @@ export const MarkDownContainer = styled.div<{color: string}>`
   }
   
   .markdown-container {
-    margin-top: 1vh;
+    /* margin-top: 1vh; */
 
     .for-panel.for-editor-preview.for-active {
       border-left: 1px solid #ddd;

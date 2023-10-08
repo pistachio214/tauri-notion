@@ -10,40 +10,30 @@ import {
     PlusOutlined,
     DeleteOutlined,
 } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
-import { Button, Layout, Dropdown, Space, Breadcrumb } from 'antd';
+import { Button, Layout, Space, Breadcrumb } from 'antd';
 import { ItemType } from 'antd/es/breadcrumb/Breadcrumb';
 import { shallowEqual } from "react-redux";
 
 import { Outlet } from 'react-router';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hook';
-import { setMarkDownEditorState, setMarkDownEditorSubfield } from '../../redux/slice/editor';
+import { setMarkDownEditorHierarchy, setMarkDownEditorState, setMarkDownEditorSubfield } from '../../redux/slice/editor';
 
 import { LogoContainer, LayoutContent, LayoutOperation } from '../../styles/layout';
 import { RootState } from '../../redux/store';
 import { MarkDownEditorState } from '../../types/editor';
-import LayoutMenuComponent from './LayoutMenuComponent';
 import { BreadcrumbItemState, BreadcrumbOption } from '../../types/global';
 import { getMenuList } from '../../api/gitee';
 import { GiteeFileContentRequest, GiteeFileContentResponse } from '../../types/gitee';
 import { AxiosResponse } from 'axios';
 import { message } from '../Antd/EscapeAntd';
+import LayoutMenuComponent from './LayoutMenuComponent';
+import LayoutSettingModalComponent from './LayoutSettingModalComponent';
 
 
 const { Sider } = Layout;
 
 const App: React.FC = () => {
-
-    const dropdownItems: MenuProps['items'] = [
-        {
-            key: '1',
-            label: (
-                <>退出</>
-            )
-        }
-    ];
-
 
     const dispatch = useAppDispatch();
 
@@ -51,7 +41,7 @@ const App: React.FC = () => {
     const breadcrumbState: BreadcrumbItemState = useAppSelector((state: RootState) => ({ ...state.breadcrumb }), shallowEqual);
 
     const [breadcrumbItems, setBreadcrumbItems] = useState<ItemType[]>([]);
-
+    const [settingModal, setSettingModal] = useState<boolean>(false);
 
     useEffect(() => {
         // 初始化面包屑
@@ -92,11 +82,20 @@ const App: React.FC = () => {
     }
 
     const createMarkDownEditor = () => {
+        //TODO 这里要处理成对应层级的值
+        dispatch(setMarkDownEditorHierarchy(1));
+
         dispatch(setMarkDownEditorSubfield(true));
         dispatch(setMarkDownEditorState(3));
     }
 
     const editMarkDownDelete = () => { }
+
+    const newPage = () => {
+        dispatch(setMarkDownEditorHierarchy(1));
+
+        createMarkDownEditor();
+    }
 
     const syncMenuAction = () => {
         let data: GiteeFileContentRequest = {
@@ -111,7 +110,7 @@ const App: React.FC = () => {
             console.log(res.data);
             const { data } = res;
 
-            if(Array.isArray(data)){
+            if (Array.isArray(data)) {
                 message.error("结果为空数组,数据不合法");
             }
 
@@ -120,7 +119,12 @@ const App: React.FC = () => {
     }
 
     return (
-        <Layout hasSider>
+        <Layout
+            hasSider
+            style={{
+                height: '100vh'
+            }}
+        >
             <Sider
                 width={300}
                 style={{
@@ -130,39 +134,30 @@ const App: React.FC = () => {
                     left: 0,
                     top: 0,
                     bottom: 0,
-                    background: '#F7F7F5'
+                    background: '#F7F7F5',
                 }}
             >
                 <LogoContainer>
-                    <Dropdown
-                        className='dropdown'
-                        // placement={'bottomRight'}
-                        menu={{
-                            items: dropdownItems,
-                            onClick: (e: { key: string }) => console.log(e)
-                        }}
-                        trigger={['click']}
-                        overlayStyle={{
-                            width: '100px',
-                            background: '#FBFAF9'
-                        }}
+
+                    <Button
+                        className='operitem-botton dropdown'
+                        type='text'
+                        onClick={(_) => setSettingModal(true)}
                     >
-                        <Button
-                            type='text'
-                            onClick={(e) => e.preventDefault()}
-                        >
-                            <div className={'logo-notion'}>N</div>
-                            <Space className='username'>
-                                Roger's Notion <SettingOutlined />
-                            </Space>
-                        </Button>
-                    </Dropdown>
+                        <div className={'logo-notion'}>N</div>
+                        <Space className='username'>
+                            Roger's Notion <SettingOutlined />
+                        </Space>
+                    </Button>
 
                     <Button
                         className='operitem-botton'
                         icon={<PlusCircleOutlined twoToneColor={'#989793'} />}
                         type='text'
-                        onClick={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                            // e.preventDefault();
+                            newPage();
+                        }}
                     >
                         <Space className='new-page'>
                             New page
@@ -184,61 +179,76 @@ const App: React.FC = () => {
                 <LayoutMenuComponent />
 
             </Sider>
-            <Layout className="site-layout" style={{ marginLeft: 300, height: '100%' }}>
-
-                <LayoutOperation>
-                    <div className='layout-operation-container'>
-                        <Button
-                            icon={<PlusOutlined />}
-                            size='small'
-                            type='text'
-                            title='new tab Ctrl+T'
-                            onClick={() => createMarkDownEditor()}
-                        />
-
-                        {
-                            !editorState.subfield ? (
-                                <Button
-                                    icon={<EditOutlined />}
-                                    size='small'
-                                    type='text'
-                                    title='edit tab Ctrl+E'
-                                    onClick={() => editMarkDownEditor(true)}
-                                />
-                            ) : null
-                        }
-
-                        {
-                            editorState.subfield ? (
-                                <Button
-                                    icon={<EyeOutlined />}
-                                    size='small'
-                                    type='text'
-                                    title='edit tab Ctrl+E'
-                                    onClick={() => editMarkDownEditor(false)}
-                                />
-                            ) : null
-                        }
-
-                        <Button
-                            icon={<DeleteOutlined />}
-                            size='small'
-                            type='text'
-                            danger
-                            title='删除'
-                            onClick={() => editMarkDownDelete()}
-                        />
-
-                        <Breadcrumb
-                            items={breadcrumbItems}
-                        />
-
-                    </div>
-                </LayoutOperation>
-
+            <Layout
+                className="site-layout"
+                style={{
+                    marginLeft: 300,
+                    height: '100%',
+                }}
+            >
                 <LayoutContent>
-                    <Outlet />
+                    <LayoutOperation>
+                        <div className='layout-operation-container'>
+                            <Button
+                                icon={<PlusOutlined />}
+                                size='small'
+                                type='text'
+                                title='new tab Ctrl+T'
+                                onClick={() => createMarkDownEditor()}
+                            />
+
+                            {
+                                !editorState.subfield ? (
+                                    <Button
+                                        icon={<EditOutlined />}
+                                        size='small'
+                                        type='text'
+                                        title='edit tab Ctrl+E'
+                                        onClick={() => editMarkDownEditor(true)}
+                                    />
+                                ) : null
+                            }
+
+                            {
+                                editorState.subfield ? (
+                                    <Button
+                                        icon={<EyeOutlined />}
+                                        size='small'
+                                        type='text'
+                                        title='edit tab Ctrl+E'
+                                        onClick={() => editMarkDownEditor(false)}
+                                    />
+                                ) : null
+                            }
+
+                            <Button
+                                icon={<DeleteOutlined />}
+                                size='small'
+                                type='text'
+                                danger
+                                title='删除'
+                                onClick={() => editMarkDownDelete()}
+                            />
+
+                            <Breadcrumb
+                                items={breadcrumbItems}
+                            />
+
+                        </div>
+                    </LayoutOperation>
+                    <div style={{
+                        paddingTop: '45px',
+                        width: '100%',
+                        height: '100%',
+                    }}>
+                        <Outlet />
+                    </div>
                 </LayoutContent>
+
+                <LayoutSettingModalComponent
+                    open={settingModal}
+                    close={() => setSettingModal(false)}
+                />
             </Layout>
         </Layout>
     );

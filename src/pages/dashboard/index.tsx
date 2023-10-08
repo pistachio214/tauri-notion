@@ -3,12 +3,13 @@ import { theme } from 'antd';
 import MarkDownEditor from "for-editor";
 import { shallowEqual } from "react-redux";
 
+import { invoke } from '@tauri-apps/api/tauri';
+
 import { MarkDownContainer } from '../../styles/dashboard';
 import { message } from '../../components/Antd/EscapeAntd';
 import { useAppSelector } from '../../redux/hook';
 import { MarkDownEditorState } from '../../types/editor';
 import { RootState } from '../../redux/store';
-
 
 const Dashboard: React.FC = () => {
     const {
@@ -18,8 +19,6 @@ const Dashboard: React.FC = () => {
     const editorState: MarkDownEditorState = useAppSelector((state: RootState) => ({ ...state.editor }), shallowEqual);
 
     const [mdContent, setMdContent] = useState<string>('');
-
-    const [saveLoading, setSaveLoading] = useState<boolean>(true);
 
     useEffect(() => {
         switch (editorState.state) {
@@ -42,22 +41,27 @@ const Dashboard: React.FC = () => {
     }
 
     const handleEditorSave = (value: string) => {
-        if (!saveLoading) {
-            return;
+        let data = {
+            label: generateLabel(value),
+            type: editorState.hierarchy,
+            open: false,
+            content: value
         }
 
-        console.log(value);
-
-        setSaveLoading(false);
+        console.log(data);
 
         message.info("保存中.....");
+        invoke("add_menu_list")
+    }
 
-        setTimeout(() => {
-            // .... 执行完各种操作后
-            setSaveLoading(true);
+    const generateLabel = (value: string) => {
+        if (value === "") {
+            return " new page "
+        }
 
-        }, 2000)
+        let lines = value.split("\n");
 
+        return lines[0].replace("#", "").replace(/\s/g, "");
     }
 
     return (
