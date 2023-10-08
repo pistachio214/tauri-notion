@@ -48,7 +48,7 @@ fn generate_json() {
 
 // 新增用户的菜单列表数据到暂存区
 #[tauri::command]
-fn add_menu_list() -> Result<Vec<MenuItemType>, String> {
+fn menu_create() -> Result<Vec<MenuItemType>, String> {
     let file: String = String::from("user_menu_temp.json");
 
     find_dir_and_file(&file, "[]");
@@ -184,7 +184,7 @@ fn main() {
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            add_menu_list,
+            menu_create,
             add_user_info,
             get_user_config_list,
             user_login,
