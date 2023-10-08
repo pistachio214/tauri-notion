@@ -46,7 +46,7 @@ fn generate_json() {
     print!("到底进来没得哟?2");
 }
 
-// 新增用户的菜单列表数据
+// 新增用户的菜单列表数据到暂存区
 #[tauri::command]
 fn add_menu_list() -> Result<Vec<MenuItemType>, String> {
     let file: String = String::from("user_menu_temp.json");
@@ -65,7 +65,7 @@ fn add_menu_list() -> Result<Vec<MenuItemType>, String> {
 
     // TODO 这里对数据进行追加
     // something code
-    
+
     return Ok(user_menu_array);
 }
 
