@@ -58,13 +58,15 @@ fn menu_create() -> Result<Vec<MenuItemType>, String> {
     // 上一步保证了文件必存在,此时获取文件内容毫无压力
     let user_menu = tauri::api::file::read_string(file_path.clone()).unwrap();
 
-    let user_menu_array: Vec<MenuItemType> = match serde_json::from_str(&user_menu) {
+    let mut user_menu_array: Vec<MenuItemType> = match serde_json::from_str(&user_menu) {
         Ok(res) => res,
         Err(_) => Vec::new(),
     };
 
-    // TODO 这里对数据进行追加
-    // something code
+    user_menu_array.push({
+        // TODO 这里对数据进行追加
+        // something code
+    });
 
     return Ok(user_menu_array);
 }
