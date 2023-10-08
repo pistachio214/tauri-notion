@@ -63,14 +63,10 @@ fn add_menu_list() -> Result<Vec<MenuItemType>, String> {
         Err(_) => Vec::new(),
     };
 
-    if user_menu_array.len() > 0 {
-        return Ok(user_menu_array);
-    } else {
-        return Err(
-            "请同步远端Git仓库的menu数据,或者您确定远端仓库没有创建菜单数据，那么请 New page"
-                .to_string(),
-        );
-    }
+    // TODO 这里对数据进行追加
+    // something code
+    
+    return Ok(user_menu_array);
 }
 
 // TODO 获取某个用户的菜单列表
@@ -91,7 +87,6 @@ fn menu_list() -> Result<Vec<MenuItemType>, String> {
     };
 
     if user_menu_array.len() > 0 {
-
         return Ok(user_menu_array);
     } else {
         return Err(
