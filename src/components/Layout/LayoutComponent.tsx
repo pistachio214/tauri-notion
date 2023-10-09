@@ -17,7 +17,12 @@ import { shallowEqual } from "react-redux";
 import { Outlet } from 'react-router';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hook';
-import { setMarkDownEditorChildrenKey, setMarkDownEditorHierarchy, setMarkDownEditorHierarchyAndParentId, setMarkDownEditorHierarchyAndSubfieldAndState, setMarkDownEditorState, setMarkDownEditorSubfield } from '../../redux/slice/editor';
+import {
+    setMarkDownEditorHierarchyAndParentId,
+    setMarkDownEditorHierarchyAndSubfieldAndState,
+    setMarkDownEditorState,
+    setMarkDownEditorSubfield
+} from '../../redux/slice/editor';
 
 import { LogoContainer, LayoutContent, LayoutOperation } from '../../styles/layout';
 import { RootState } from '../../redux/store';
@@ -88,9 +93,11 @@ const App: React.FC = () => {
 
     const editMarkDownDelete = () => { }
 
-    const newPage = () => {
+    const newPage = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         dispatch(setMarkDownEditorHierarchyAndParentId({ hierarchy: 1, parentId: "0" }))
         createMarkDownEditor();
+
+        e.stopPropagation();
     }
 
     const syncMenuAction = () => {
@@ -151,8 +158,7 @@ const App: React.FC = () => {
                         icon={<PlusCircleOutlined twoToneColor={'#989793'} />}
                         type='text'
                         onClick={(e) => {
-                            // e.preventDefault();
-                            newPage();
+                            newPage(e);
                         }}
                     >
                         <Space className='new-page'>
