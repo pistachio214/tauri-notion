@@ -312,13 +312,10 @@ const LayoutMenuComponent: React.FC = () => {
             dispatch(setBreadcrumbItems(breadcrumb));
         }
 
-        // dispatch(setSystemMenuSelectKey(menu.id));
+        dispatch(setSystemMenuSelectKey(menu.id));
     }
 
     const clickMenuAdd = (menu: MenuItemType, e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-        console.log('原数据的type为: ', menu.type);
-        console.log('添加数据的type为: ', menu.type + 1);
-
         let ids = findIndexById(menuDataArray, menu.id, []);
 
         dispatch(setMarkDownEditorChildrenKey(ids));
