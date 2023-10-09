@@ -15,145 +15,23 @@ import {
 import { invoke } from '@tauri-apps/api/tauri';
 
 import { LayoutMenuContainer } from "../../styles/layout";
-import { useAppDispatch } from "../../redux/hook";
+import { useAppDispatch, useAppSelector } from "../../redux/hook";
 import { BreadcrumbOption } from "../../types/global";
 import { setBreadcrumbItems } from "../../redux/slice/breadcrumb";
 import { message } from "../Antd/EscapeAntd";
-
-interface MenuItemType {
-    id: string
-    type: number
-    label: string
-    open: boolean
-    content?: string
-    icon?: React.ReactNode
-    children?: MenuItemType[]
-}
-
-const data: MenuItemType[] = [
-    {
-        id: "1",
-        type: 1,
-        label: "圆月弯刀",
-        open: false,
-        children: [
-            {
-                id: '1-1',
-                type: 2,
-                label: "小楼一夜听春雨",
-                open: false,
-                children: [
-                    {
-                        id: '1-1-1',
-                        type: 3,
-                        label: "第1场春雨",
-                        open: false,
-                        children: [
-                            {
-                                id: '1-1-1-1',
-                                type: 4,
-                                label: "测试更多的目录",
-                                open: false,
-                            }
-                        ]
-                    },
-                    {
-                        id: '1-1-2',
-                        type: 3,
-                        label: "第2场春雨",
-                        open: false,
-                    },
-                    {
-                        id: '1-1-3',
-                        type: 3,
-                        label: "第3场春雨",
-                        open: false,
-                    },
-                    {
-                        id: '1-1-4',
-                        type: 3,
-                        label: "第4场春雨",
-                        open: false,
-                    },
-                    {
-                        id: '1-1-5',
-                        type: 3,
-                        label: "第5场春雨",
-                        open: false,
-                    },
-                ]
-            },
-            {
-                id: '1-2',
-                type: 2,
-                label: "天外流星",
-                open: false,
-                children: [
-                    {
-                        id: '1-2-1',
-                        type: 3,
-                        label: "第1颗流星",
-                        open: false,
-                    },
-                    {
-                        id: '1-2-2',
-                        type: 3,
-                        label: "第2颗流星",
-                        open: false,
-                    },
-                    {
-                        id: '1-2-3',
-                        type: 3,
-                        label: "第3颗流星",
-                        open: false,
-                    },
-                ]
-            }
-        ]
-    },
-    {
-        id: "2",
-        type: 1,
-        label: "萧十一郎",
-        open: false,
-        children: [
-            {
-                id: '2-1',
-                type: 2,
-                label: "萧十一郎的红颜",
-                open: false,
-                children: [
-                    {
-                        id: '2-1-1',
-                        type: 3,
-                        label: "沈璧君",
-                        open: false,
-                    },
-                    {
-                        id: '2-1-2',
-                        type: 3,
-                        label: "风四娘",
-                        open: false,
-                    },
-                ]
-            },
-            {
-                id: '2-2',
-                type: 2,
-                label: "萧十一郎的武器",
-                open: false,
-                children: [
-                    {
-                        id: '2-2-1',
-                        type: 3,
-                        label: "割鹿刀",
-                        open: false,
-                    },
-                ]
-            }
-        ]
-    }
-];
+import {
+    setMarkDownEditorChildrenKey,
+    setMarkDownEditorContentAndStateAndSubfield,
+    setMarkDownEditorHierarchyAndParentId,
+    setMarkDownEditorHierarchyAndSubfieldAndState
+} from "../../redux/slice/editor";
+import { MenuItem, MenuItemType } from "../../types/menu";
+import { buildBreadcrumb, buildMenuItemReload } from "../../utils/MenuUtil";
+import { RootState } from "../../redux/store";
+import { shallowEqual } from "react-redux";
+import { SystemState } from "../../types/system";
+import { MarkDownEditorState } from "../../types/editor";
+import { setSystemMenuSelectKey } from "../../redux/slice/system";
 
 const items: MenuProps['items'] = [
     {
@@ -192,25 +70,120 @@ const LayoutMenuComponent: React.FC = () => {
 
     const dispatch = useAppDispatch();
 
-    const [menuDataArray, setMenuDataArray] = useState<MenuItemType[]>(data);
-    const [menuArray, setMenuArray] = useState<MenuItemType[]>([]);
-    const [selectKey, setSelectKey] = useState<String>('');
+    const systemState: SystemState = useAppSelector((state: RootState) => ({ ...state.system }), shallowEqual);
+    const editorState: MarkDownEditorState = useAppSelector((state: RootState) => ({ ...state.editor }), shallowEqual);
 
-    useEffect(() => {
-        setMenuArray(buildItem(menuDataArray));
-    }, [menuDataArray])
+    const [menuDataArray, setMenuDataArray] = useState<MenuItemType[]>([]);
+    const [menuArray, setMenuArray] = useState<MenuItemType[]>([]);
 
     useEffect(() => {
         getLocalhostMenuList();
-    }, [])
+    }, [systemState.menu_reload])
+
+    useEffect(() => {
+        setMenuArray(buildItem(menuDataArray));
+
+    }, [menuDataArray])
 
     const getLocalhostMenuList = () => {
-        invoke<MenuItemType[]>('menu_list')
+
+        invoke<MenuItem[][]>('menu_list')
             .then(res => {
-                console.log(res);
+                let localMenu: MenuItemType[] = [];
+                res[0].forEach((item: MenuItem) => {
+                    localMenu.push({
+                        id: item.id,
+                        type: item.type,
+                        label: item.label,
+                        open: false,
+                        parent_id: item.parent_id,
+                        content: item.content,
+                    })
+                })
+
+                let cacheMenu: MenuItemType[] = [];
+                res[1].forEach((item: MenuItem) => {
+                    cacheMenu.push({
+                        id: item.id,
+                        type: item.type,
+                        label: item.label,
+                        open: false,
+                        parent_id: item.parent_id,
+                        content: item.content,
+                    })
+                })
+
+                buildMenuItem(localMenu, cacheMenu);
             })
             .catch(err => message.error(err));
 
+    }
+
+    const buildMenuItem = (localMenu: MenuItemType[], cacheMenu: MenuItemType[]) => {
+        let tempMenu: MenuItemType[] = [];
+
+        // local blocks is empty and cache blocks is empty
+        if (localMenu.length < 1 && cacheMenu.length < 1) {
+            tempMenu = [];
+        }
+
+        // local blocks is empty
+        if (localMenu.length < 1) {
+            tempMenu = cacheMenu;
+        }
+
+        // cache blocks is empty
+        if (cacheMenu.length < 1) {
+            tempMenu = localMenu;
+        }
+
+        tempMenu = [...localMenu];
+
+        // 1. 查询缓冲中的 同 id数据，以缓存为准
+        tempMenu.forEach((tempItem: MenuItemType, index: number) => {
+            cacheMenu.forEach((cacheItem: MenuItemType) => {
+                if (tempItem.id === cacheItem.id) {
+                    tempMenu[index] = cacheItem;
+                }
+            });
+        });
+
+        // 2. 缓存中的数据，如果本地不存在,则加入进去
+        cacheMenu.forEach((cacheItem: MenuItemType) => {
+            let existence = false;
+            localMenu.forEach((tempItem: MenuItemType) => {
+                if (cacheItem.id === tempItem.id) {
+                    existence = true;
+                }
+            })
+
+            if (!existence) {
+                tempMenu.push(cacheItem);
+            }
+        });
+
+        tempMenu = buildChildren(tempMenu);
+
+        buildMenuItemReload(editorState.childrenKey, tempMenu);
+
+        setMenuDataArray(tempMenu);
+    }
+
+
+    const buildChildren = (data: MenuItemType[], parentId: string = '0') => {
+        let children: MenuItemType[] = [];
+
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].parent_id === parentId) {
+                const childrenData = buildChildren(data, data[i].id);
+                if (childrenData.length) {
+                    data[i].children = childrenData;
+                }
+                children.push(data[i]);
+            }
+        }
+
+        return children;
     }
 
     const buildItem = (data: MenuItemType[]) => {
@@ -224,15 +197,15 @@ const LayoutMenuComponent: React.FC = () => {
             };
 
             if (item.open && item.children != undefined && item.children.length > 0) {
-                db.icon = <FolderOpenOutlined className="icon-style" onClick={() => clickMenu(item.id)} />
+                db.icon = <FolderOpenOutlined className="icon-style" onClick={(e) => clickMenu(item.id, e)} />
                 res.push(db);
 
                 res = [...res, ...buildItem(item.children)];
             } else {
                 if (item.type === 1 || item.children != undefined && item.children.length > 0) {
-                    db.icon = <FolderOutlined className="icon-style" onClick={() => clickMenu(item.id)} />
+                    db.icon = <FolderOutlined className="icon-style" onClick={(e) => clickMenu(item.id, e)} />
                 } else {
-                    db.icon = <FileTextOutlined className="icon-style" onClick={() => clickMenu(item.id)} />
+                    db.icon = <FileTextOutlined className="icon-style" onClick={(e) => clickMenu(item.id, e)} />
                 }
                 res.push(db);
             }
@@ -254,7 +227,7 @@ const LayoutMenuComponent: React.FC = () => {
                 result = [...targetArr, i];
                 break;
             } else {
-                if (arr[i].children !== undefined && arr[i].children!.length > 0) {
+                if (arr[i].children !== undefined && arr[i].children !== null && arr[i].children!.length > 0) {
                     let tempKey = [...result, i];
                     let findIndex = findIndexById(arr[i].children!, targetId, tempKey);
                     if (findIndex.length > 0 && !arraysAreEqual(findIndex, tempKey)) {
@@ -288,36 +261,9 @@ const LayoutMenuComponent: React.FC = () => {
         return newData; // 返回整个被修改的数据副本
     }
 
-    // 构建面包屑的数据
-    const buildBreadcrumb = (ids: number[], data: MenuItemType[]) => {
-        const newData = [...data]; // 创建一个副本以保留原始数据的不可变性
-        let current = newData;
-        let breadcrumb: BreadcrumbOption[] = [];
-
-        for (const index of ids) {
-            if (current[index] && current[index].children) {
-                breadcrumb.push({
-                    label: current[index].label,
-                    isChildren: current[index] && current[index].children ? true : false
-                });
-                current = current[index].children!;
-            } else {
-                breadcrumb.push({
-                    label: current[index].label,
-                    isChildren: current[index] && current[index].children ? true : false
-                });
-
-                return breadcrumb; // 如果索引无效，则返回原始数据
-            }
-        }
-
-        return breadcrumb;
-    }
-
-    const clickMenu = (id: string) => {
-
+    const clickMenu = (id: string, e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         let ids = findIndexById(menuDataArray, id, []);
-        console.log(ids);
+        console.log('ids= ', ids)
 
         let menu: MenuItemType | undefined = undefined;
 
@@ -335,21 +281,50 @@ const LayoutMenuComponent: React.FC = () => {
                 setMenuDataArray(tempMenuArray);
             }
         }
+
+        e.stopPropagation();
     }
 
     const clickMenuTitle = (menu: MenuItemType) => {
         let ids = findIndexById(menuDataArray, menu.id, []);
         let breadcrumb: BreadcrumbOption[] = buildBreadcrumb(ids, menuDataArray); // 构建面包屑数据
         if (breadcrumb.length > 0) {
+            let type = 1;
+            let menu: MenuItemType | undefined = undefined;
+            let tempMenuArray = [...menuDataArray];
+            if (ids.length === 1) {
+                menu = menuDataArray[ids[0]];
+
+                type = menu.type + 1;
+            } else {
+                tempMenuArray = getMenu(ids, menuDataArray);
+
+                if (tempMenuArray !== undefined) {
+                    let lastMenu = tempMenuArray[tempMenuArray.length - 1];
+
+                    type = lastMenu.type + 1;
+                }
+            }
+            dispatch(setMarkDownEditorHierarchyAndParentId({ hierarchy: type, parentId: breadcrumb[breadcrumb.length - 1].id }));
+
+            dispatch(setMarkDownEditorContentAndStateAndSubfield({ content: breadcrumb[breadcrumb.length - 1].content, state: 2, subfield: false }));
+            dispatch(setMarkDownEditorChildrenKey(ids));
             dispatch(setBreadcrumbItems(breadcrumb));
         }
 
-        setSelectKey(menu.id);
+        // dispatch(setSystemMenuSelectKey(menu.id));
     }
 
-    const clickMenuAdd = (menu: MenuItemType) => {
+    const clickMenuAdd = (menu: MenuItemType, e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         console.log('原数据的type为: ', menu.type);
         console.log('添加数据的type为: ', menu.type + 1);
+
+        let ids = findIndexById(menuDataArray, menu.id, []);
+
+        dispatch(setMarkDownEditorChildrenKey(ids));
+        dispatch(setMarkDownEditorHierarchyAndSubfieldAndState({ hierarchy: (menu.type + 1), subfield: true, state: 3 }));
+
+        e.stopPropagation();
     }
 
     return (
@@ -360,7 +335,7 @@ const LayoutMenuComponent: React.FC = () => {
                         return (
                             <dt
                                 key={`${index}-menu-item`}
-                                className={`menu-item-title ${item.id == selectKey ? 'active' : ''}`}
+                                className={`menu-item-title ${item.id == systemState.menu_select_key ? 'active' : ''}`}
                                 style={{
                                     paddingLeft: `${item.type * 2}vh`
                                 }}
@@ -387,7 +362,7 @@ const LayoutMenuComponent: React.FC = () => {
                                                 icon={<EllipsisOutlined />}
                                                 type="text"
                                                 size='small'
-                                                onClick={() => clickMenuAdd(item)}
+                                                onClick={(e) => clickMenuAdd(item, e)}
                                             />
                                         </Dropdown>
 
@@ -396,7 +371,7 @@ const LayoutMenuComponent: React.FC = () => {
                                             icon={<PlusOutlined />}
                                             type="text"
                                             size='small'
-                                            onClick={() => clickMenuAdd(item)}
+                                            onClick={(e) => clickMenuAdd(item, e)}
                                         />
                                     </div>
                                 </div>

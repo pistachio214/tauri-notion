@@ -7,16 +7,20 @@ import { invoke } from '@tauri-apps/api/tauri';
 
 import { MarkDownContainer } from '../../styles/dashboard';
 import { message } from '../../components/Antd/EscapeAntd';
-import { useAppSelector } from '../../redux/hook';
+import { useAppDispatch, useAppSelector } from '../../redux/hook';
 import { MarkDownEditorState } from '../../types/editor';
 import { RootState } from '../../redux/store';
+import { setSystemMenuReload } from '../../redux/slice/system';
+import { SystemState } from '../../types/system';
 
 const Dashboard: React.FC = () => {
     const {
         token: { colorBgContainer },
     } = theme.useToken();
 
+    const dispatch = useAppDispatch();
     const editorState: MarkDownEditorState = useAppSelector((state: RootState) => ({ ...state.editor }), shallowEqual);
+    const systemState: SystemState = useAppSelector((state: RootState) => ({ ...state.system }), shallowEqual);
 
     const [mdContent, setMdContent] = useState<string>('');
 
@@ -33,25 +37,34 @@ const Dashboard: React.FC = () => {
                 break;
             default:
         }
-    }, [editorState.state])
+    }, [editorState.state, editorState.content])
 
     const showEditor = () => {
         // 后续要根据选择，进行内容的注入，目前先就这样吧
-        setMdContent(`# 小楼一夜听春雨`)
+        setMdContent(editorState.content);
     }
 
     const handleEditorSave = (value: string) => {
+
         let data = {
             label: generateLabel(value),
             type: editorState.hierarchy,
             open: false,
-            content: value
+            content: value,
+            parent_id: editorState.parentId,
         }
 
-        console.log(data);
+        invoke("menu_create", { data })
+            .then(() => {
 
-        message.info("保存中.....");
-        invoke("add_menu_list")
+                dispatch(setSystemMenuReload(!systemState.menu_reload))
+                message.success('保存成功');
+                
+            })
+            .catch((e) => {
+                console.log(e);
+                message.error('保存失败');
+            })
     }
 
     const generateLabel = (value: string) => {

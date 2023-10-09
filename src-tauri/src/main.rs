@@ -26,6 +26,8 @@ struct MenuItemType {
     r#type: i32,
     label: String,
     open: bool,
+    parent_id: String,
+    content: String,
     children: Option<Vec<MenuItemType>>,
 }
 
@@ -40,6 +42,15 @@ struct SysUserType {
     password: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct MenuItemTypeReq {
+    r#type: i32,
+    label: String,
+    open: bool,
+    content: String,
+    parent_id: String,
+}
+
 // 测试案例,放在最上面,封测就删掉
 #[tauri::command]
 fn generate_json() {
@@ -48,7 +59,7 @@ fn generate_json() {
 
 // 新增用户的菜单列表数据到暂存区
 #[tauri::command]
-fn menu_create() -> Result<Vec<MenuItemType>, String> {
+fn menu_create(data: MenuItemTypeReq) -> Result<Vec<MenuItemType>, String> {
     let file: String = String::from("user_menu_temp.json");
 
     find_dir_and_file(&file, "[]");
@@ -63,39 +74,30 @@ fn menu_create() -> Result<Vec<MenuItemType>, String> {
         Err(_) => Vec::new(),
     };
 
-    user_menu_array.push({
-        // TODO 这里对数据进行追加
-        // something code
-    });
+    let push_data: MenuItemType = MenuItemType {
+        id: Uuid::new_v4().to_string(),
+        r#type: data.r#type,
+        parent_id: data.parent_id,
+        label: data.label,
+        open: false,
+        children: None,
+        content: data.content,
+    };
+
+    user_menu_array.push(push_data);
+
+    std::fs::write(&file_path, serde_json::to_string(&user_menu_array).unwrap()).unwrap();
 
     return Ok(user_menu_array);
 }
 
 // TODO 获取某个用户的菜单列表
 #[tauri::command]
-fn menu_list() -> Result<Vec<MenuItemType>, String> {
-    let file: String = String::from("user_menu.json");
+fn menu_list() -> Result<(Vec<MenuItemType>, Vec<MenuItemType>), String> {
+    let local_menu = get_local_menu();
+    let cache_menu = get_cache_menu();
 
-    find_dir_and_file(&file, "[]");
-
-    let file_path = get_data_file(file);
-
-    // 上一步保证了文件必存在,此时获取文件内容毫无压力
-    let user_menu = tauri::api::file::read_string(file_path.clone()).unwrap();
-
-    let user_menu_array: Vec<MenuItemType> = match serde_json::from_str(&user_menu) {
-        Ok(res) => res,
-        Err(_) => Vec::new(),
-    };
-
-    if user_menu_array.len() > 0 {
-        return Ok(user_menu_array);
-    } else {
-        return Err(
-            "请同步远端Git仓库的menu数据,或者您确定远端仓库没有创建菜单数据，那么请 New page"
-                .to_string(),
-        );
-    }
+    Ok((local_menu, cache_menu))
 }
 
 // TOOD 试试能不能同步线上的菜单数据
@@ -195,6 +197,43 @@ fn main() {
         ])
         .run(context)
         .expect("error while running tauri application");
+}
+
+// 获取 Cache blocks 的menu数据
+fn get_cache_menu() -> Vec<MenuItemType> {
+    let file: String = String::from("user_menu_temp.json");
+
+    find_dir_and_file(&file, "[]");
+
+    let file_path = get_data_file(file);
+
+    // 上一步保证了文件必存在,此时获取文件内容毫无压力
+    let user_menu = tauri::api::file::read_string(file_path.clone()).unwrap();
+
+    let user_menu_array: Vec<MenuItemType> = match serde_json::from_str(&user_menu) {
+        Ok(res) => res,
+        Err(_) => Vec::new(),
+    };
+
+    return user_menu_array;
+}
+// 获取 Local blocks 的menu数据
+fn get_local_menu() -> Vec<MenuItemType> {
+    let file: String = String::from("user_menu.json");
+
+    find_dir_and_file(&file, "[]");
+
+    let file_path = get_data_file(file);
+
+    // 上一步保证了文件必存在,此时获取文件内容毫无压力
+    let user_menu = tauri::api::file::read_string(file_path.clone()).unwrap();
+
+    let user_menu_array: Vec<MenuItemType> = match serde_json::from_str(&user_menu) {
+        Ok(res) => res,
+        Err(_) => Vec::new(),
+    };
+
+    return user_menu_array;
 }
 
 // 获取应用的data地址

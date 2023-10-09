@@ -20,6 +20,7 @@ import autoMergeLevel2 from "redux-persist/lib/stateReconciler/autoMergeLevel2";
 
 import markDownEditorSlice from "./slice/editor";
 import breadcrumbItemSlice from "./slice/breadcrumb";
+import systemSlice from "./slice/system";
 
 const persistConfig: PersistConfig<ReducersMapObject> = {
     key: 'root',
@@ -30,6 +31,7 @@ const persistConfig: PersistConfig<ReducersMapObject> = {
 const rootReducer: Reducer<CombinedState<any>, any> = combineReducers({
     editor: markDownEditorSlice,
     breadcrumb: breadcrumbItemSlice,
+    system: systemSlice,
 });
 
 const persistedReducer: Reducer<any & PersistPartial, any> = persistReducer(persistConfig, rootReducer)

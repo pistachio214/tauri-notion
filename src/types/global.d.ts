@@ -10,6 +10,8 @@ interface BreadcrumbItemState {
 
 interface BreadcrumbOption {
     label: string 
+    id: string
+    content: string
     isChildren: boolean
 }
 

@@ -17,7 +17,7 @@ import { shallowEqual } from "react-redux";
 import { Outlet } from 'react-router';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hook';
-import { setMarkDownEditorHierarchy, setMarkDownEditorState, setMarkDownEditorSubfield } from '../../redux/slice/editor';
+import { setMarkDownEditorChildrenKey, setMarkDownEditorHierarchy, setMarkDownEditorHierarchyAndParentId, setMarkDownEditorHierarchyAndSubfieldAndState, setMarkDownEditorState, setMarkDownEditorSubfield } from '../../redux/slice/editor';
 
 import { LogoContainer, LayoutContent, LayoutOperation } from '../../styles/layout';
 import { RootState } from '../../redux/store';
@@ -83,17 +83,13 @@ const App: React.FC = () => {
 
     const createMarkDownEditor = () => {
         //TODO 这里要处理成对应层级的值
-        dispatch(setMarkDownEditorHierarchy(1));
-
-        dispatch(setMarkDownEditorSubfield(true));
-        dispatch(setMarkDownEditorState(3));
+        dispatch(setMarkDownEditorHierarchyAndSubfieldAndState({ hierarchy: 1, subfield: true, state: 3 }));
     }
 
     const editMarkDownDelete = () => { }
 
     const newPage = () => {
-        dispatch(setMarkDownEditorHierarchy(1));
-
+        dispatch(setMarkDownEditorHierarchyAndParentId({ hierarchy: 1, parentId: "0" }))
         createMarkDownEditor();
     }
 
