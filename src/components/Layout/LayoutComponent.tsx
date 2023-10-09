@@ -28,10 +28,6 @@ import { LogoContainer, LayoutContent, LayoutOperation } from '../../styles/layo
 import { RootState } from '../../redux/store';
 import { MarkDownEditorState } from '../../types/editor';
 import { BreadcrumbItemState, BreadcrumbOption } from '../../types/global';
-import { getMenuList } from '../../api/gitee';
-import { GiteeFileContentRequest, GiteeFileContentResponse } from '../../types/gitee';
-import { AxiosResponse } from 'axios';
-import { message } from '../Antd/EscapeAntd';
 import LayoutMenuComponent from './LayoutMenuComponent';
 import LayoutSettingModalComponent from './LayoutSettingModalComponent';
 
@@ -100,25 +96,11 @@ const App: React.FC = () => {
         e.stopPropagation();
     }
 
-    const syncMenuAction = () => {
-        let data: GiteeFileContentRequest = {
-            access_token: '04fe3dabb3769ded506d8122891a04fa',
-            ref: 'master',
-            owner: 'flayingoranges',
-            repo: "test-git",
-            path: 'menu.php'
-        };
+    const syncMenuAction = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
 
-        getMenuList(data).then((res: AxiosResponse<GiteeFileContentResponse | []>) => {
-            console.log(res.data);
-            const { data } = res;
+        console.log('这里进行询问是否进行全局同步');
 
-            if (Array.isArray(data)) {
-                message.error("结果为空数组,数据不合法");
-            }
-
-            // console.log(typeof data);
-        })
+        e.stopPropagation();
     }
 
     return (
@@ -170,7 +152,7 @@ const App: React.FC = () => {
                         className='operitem-botton'
                         icon={<SyncOutlined twoToneColor={'#989793'} />}
                         type='text'
-                        onClick={(_) => syncMenuAction()}
+                        onClick={(e) => syncMenuAction(e)}
                     >
                         <Space className='new-page'>
                             Sync Menu
