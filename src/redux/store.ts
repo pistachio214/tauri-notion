@@ -18,9 +18,9 @@ import { PersistConfig } from 'redux-persist/es/types'
 import { PersistPartial } from "redux-persist/es/persistReducer";
 import autoMergeLevel2 from "redux-persist/lib/stateReconciler/autoMergeLevel2";
 
-import markDownEditorSlice from "./slice/editor";
-import breadcrumbItemSlice from "./slice/breadcrumb";
-import systemSlice from "./slice/system";
+import markDownEditorSlice from "@/redux/slice/editor";
+import breadcrumbItemSlice from "@/redux/slice/breadcrumb";
+import systemSlice from "@/redux/slice/system";
 
 const persistConfig: PersistConfig<ReducersMapObject> = {
     key: 'root',

@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { SystemState } from "../../types/system";
+import { SystemState } from "@/types/system";
 
 const initialState: SystemState = {
     menu_reload: false,

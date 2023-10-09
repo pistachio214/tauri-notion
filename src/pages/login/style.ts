@@ -1,6 +1,6 @@
 import styled, { keyframes } from "styled-components";
 import { Button } from "antd";
-import { Rotate } from "../../styles/global";
+import { Rotate } from "@/styles/global";
 
 const fromLeft = keyframes`
   from {

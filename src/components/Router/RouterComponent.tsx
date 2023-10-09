@@ -4,10 +4,10 @@ import React, {
 import { Spin } from "antd";
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 
-import LayoutComponent from './../Layout/LayoutComponent';
+import LayoutComponent from '@/components/Layout/LayoutComponent';
 
-import Login from "../../pages/login";
-import Dashboard from "../../pages/dashboard";
+import Login from "@/pages/login";
+import Dashboard from "@/pages/dashboard";
 
 const RouterComponent: React.FC = () => {
 

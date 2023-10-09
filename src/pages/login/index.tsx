@@ -14,7 +14,7 @@ import { AxiosResponse } from "axios";
 
 import { invoke } from '@tauri-apps/api/tauri'
 
-import { message } from "../../components/Antd/EscapeAntd";
+import { message } from "@/components/Antd/EscapeAntd";
 import {
     LoginContainer,
     LoginBg,
@@ -24,148 +24,14 @@ import {
     IconBox,
     LoginButton,
     UsernameButton,
-} from "./style";
-import login_img from "../../assets/login_img.png";
-import react_icon from "../../assets/react.svg";
-import defaultSettings from "./../../defaultSettings";
-import CreateUserModalComponent from "../../components/User/CreateUserModalComponent";
-import { SysUser } from "../../types/user";
-import { GiteeErrorResponse, GiteeFileContentRequest, GiteeFileContentResponse } from "../../types/gitee";
-import { getMenuList } from "../../api/gitee";
-
-interface MenuItemType {
-    id: string
-    type: number
-    label: string
-    open: boolean
-    icon?: React.ReactNode
-    children?: MenuItemType[]
-}
-
-const data: MenuItemType[] = [
-    {
-        id: "1",
-        type: 1,
-        label: "圆月弯刀",
-        open: false,
-        children: [
-            {
-                id: '1-1',
-                type: 2,
-                label: "小楼一夜听春雨",
-                open: false,
-                children: [
-                    {
-                        id: '1-1-1',
-                        type: 3,
-                        label: "第1场春雨",
-                        open: false,
-                        children: [
-                            {
-                                id: '1-1-1-1',
-                                type: 4,
-                                label: "测试更多的目录",
-                                open: false,
-                            }
-                        ]
-                    },
-                    {
-                        id: '1-1-2',
-                        type: 3,
-                        label: "第2场春雨",
-                        open: false,
-                    },
-                    {
-                        id: '1-1-3',
-                        type: 3,
-                        label: "第3场春雨",
-                        open: false,
-                    },
-                    {
-                        id: '1-1-4',
-                        type: 3,
-                        label: "第4场春雨",
-                        open: false,
-                    },
-                    {
-                        id: '1-1-5',
-                        type: 3,
-                        label: "第5场春雨",
-                        open: false,
-                    },
-                ]
-            },
-            {
-                id: '1-2',
-                type: 2,
-                label: "天外流星",
-                open: false,
-                children: [
-                    {
-                        id: '1-2-1',
-                        type: 3,
-                        label: "第1颗流星",
-                        open: false,
-                    },
-                    {
-                        id: '1-2-2',
-                        type: 3,
-                        label: "第2颗流星",
-                        open: false,
-                    },
-                    {
-                        id: '1-2-3',
-                        type: 3,
-                        label: "第3颗流星",
-                        open: false,
-                    },
-                ]
-            }
-        ]
-    },
-    {
-        id: "2",
-        type: 1,
-        label: "萧十一郎",
-        open: false,
-        children: [
-            {
-                id: '2-1',
-                type: 2,
-                label: "萧十一郎的红颜",
-                open: false,
-                children: [
-                    {
-                        id: '2-1-1',
-                        type: 3,
-                        label: "沈璧君",
-                        open: false,
-                    },
-                    {
-                        id: '2-1-2',
-                        type: 3,
-                        label: "风四娘",
-                        open: false,
-                    },
-                ]
-            },
-            {
-                id: '2-2',
-                type: 2,
-                label: "萧十一郎的武器",
-                open: false,
-                children: [
-                    {
-                        id: '2-2-1',
-                        type: 3,
-                        label: "割鹿刀",
-                        open: false,
-                    },
-                ]
-            }
-        ]
-    }
-];
+} from "@/pages/login/style";
+import login_img from "@/assets/login_img.png";
+import react_icon from "@/assets/react.svg";
+import defaultSettings from "@/defaultSettings";
+import CreateUserModalComponent from "@/components/User/CreateUserModalComponent";
+import { SysUser } from "@/types/user";
+import { GiteeErrorResponse, GiteeFileContentRequest, GiteeFileContentResponse } from "@/types/gitee";
+import { getMenuList } from "@/api/gitee";
 
 interface FormState {
     id: string;

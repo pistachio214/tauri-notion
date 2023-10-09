@@ -16,20 +16,20 @@ import { shallowEqual } from "react-redux";
 
 import { Outlet } from 'react-router';
 
-import { useAppDispatch, useAppSelector } from '../../redux/hook';
+import { useAppDispatch, useAppSelector } from '@/redux/hook';
 import {
     setMarkDownEditorHierarchyAndParentId,
     setMarkDownEditorHierarchyAndSubfieldAndState,
     setMarkDownEditorState,
     setMarkDownEditorSubfield
-} from '../../redux/slice/editor';
+} from '@/redux/slice/editor';
 
-import { LogoContainer, LayoutContent, LayoutOperation } from '../../styles/layout';
-import { RootState } from '../../redux/store';
-import { MarkDownEditorState } from '../../types/editor';
-import { BreadcrumbItemState, BreadcrumbOption } from '../../types/global';
-import LayoutMenuComponent from './LayoutMenuComponent';
-import LayoutSettingModalComponent from './LayoutSettingModalComponent';
+import { LogoContainer, LayoutContent, LayoutOperation } from '@/styles/layout';
+import { RootState } from '@/redux/store';
+import { MarkDownEditorState } from '@/types/editor';
+import { BreadcrumbItemState, BreadcrumbOption } from '@/types/global';
+import LayoutMenuComponent from '@/components/Layout/LayoutMenuComponent';
+import LayoutSettingModalComponent from '@/components/Layout/LayoutSettingModalComponent';
 
 
 const { Sider } = Layout;

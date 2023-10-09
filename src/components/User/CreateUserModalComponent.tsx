@@ -8,8 +8,8 @@ import {
 
 import { invoke } from '@tauri-apps/api/tauri'
 
-import { CreateUserModalContainer } from "../../styles/user";
-import { SysUser } from "../../types/user";
+import { CreateUserModalContainer } from "@/styles/user";
+import { SysUser } from "@/types/user";
 
 interface IProps {
     open: boolean

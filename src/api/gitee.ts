@@ -1,5 +1,5 @@
 import { GiteeFileContentRequest } from '../types/gitee';
-import request from './../axios/request'
+import request from '@/axios/request'
 
 export const getMenuList = (data: GiteeFileContentRequest) => {
     return request({

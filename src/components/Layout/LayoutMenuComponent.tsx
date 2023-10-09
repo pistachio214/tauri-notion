@@ -11,27 +11,27 @@ import {
     DeleteOutlined,
     EllipsisOutlined,
 } from '@ant-design/icons';
+import { shallowEqual } from "react-redux";
 
 import { invoke } from '@tauri-apps/api/tauri';
 
-import { LayoutMenuContainer } from "../../styles/layout";
-import { useAppDispatch, useAppSelector } from "../../redux/hook";
-import { BreadcrumbOption } from "../../types/global";
-import { setBreadcrumbItems } from "../../redux/slice/breadcrumb";
-import { message } from "../Antd/EscapeAntd";
+import { LayoutMenuContainer } from "@/styles/layout";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import { BreadcrumbOption } from "@/types/global";
+import { setBreadcrumbItems } from "@/redux/slice/breadcrumb";
+import { message } from "@/components/Antd/EscapeAntd";
 import {
     setMarkDownEditorChildrenKey,
     setMarkDownEditorContentAndStateAndSubfield,
     setMarkDownEditorHierarchyAndParentId,
     setMarkDownEditorHierarchyAndSubfieldAndState
-} from "../../redux/slice/editor";
-import { MenuItem, MenuItemType } from "../../types/menu";
-import { buildBreadcrumb, buildMenuItemReload } from "../../utils/MenuUtil";
-import { RootState } from "../../redux/store";
-import { shallowEqual } from "react-redux";
-import { SystemState } from "../../types/system";
-import { MarkDownEditorState } from "../../types/editor";
-import { setSystemMenuSelectKey } from "../../redux/slice/system";
+} from "@/redux/slice/editor";
+import { MenuItem, MenuItemType } from "@/types/menu";
+import { buildBreadcrumb, buildMenuItemReload } from "@/utils/MenuUtil";
+import { RootState } from "@/redux/store";
+import { SystemState } from "@/types/system";
+import { MarkDownEditorState } from "@/types/editor";
+import { setSystemMenuSelectKey } from "@/redux/slice/system";
 
 const items: MenuProps['items'] = [
     {

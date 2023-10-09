@@ -4,7 +4,7 @@ import {
     MarkDownEditorChangeHierarchyAndParentId,
     MarkDownEditorChangeHierarchyAndSubfieldAndState,
     MarkDownEditorState
-} from './../../types/editor';
+} from '@/types/editor';
 
 const initialState: MarkDownEditorState = {
     subfield: false,

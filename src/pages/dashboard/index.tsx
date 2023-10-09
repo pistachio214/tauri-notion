@@ -5,13 +5,13 @@ import { shallowEqual } from "react-redux";
 
 import { invoke } from '@tauri-apps/api/tauri';
 
-import { MarkDownContainer } from '../../styles/dashboard';
-import { message } from '../../components/Antd/EscapeAntd';
-import { useAppDispatch, useAppSelector } from '../../redux/hook';
-import { MarkDownEditorState } from '../../types/editor';
-import { RootState } from '../../redux/store';
-import { setSystemMenuReload } from '../../redux/slice/system';
-import { SystemState } from '../../types/system';
+import { MarkDownContainer } from '@/styles/dashboard';
+import { message } from '@/components/Antd/EscapeAntd';
+import { useAppDispatch, useAppSelector } from '@/redux/hook';
+import { MarkDownEditorState } from '@/types/editor';
+import { RootState } from '@/redux/store';
+import { setSystemMenuReload } from '@/redux/slice/system';
+import { SystemState } from '@/types/system';
 
 const Dashboard: React.FC = () => {
     const {

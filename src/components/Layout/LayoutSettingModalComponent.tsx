@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Tabs, Modal, Card, Space } from 'antd';
+import { Tabs, Modal, Card } from 'antd';
 import type { TabsProps } from 'antd';
 import { TagsOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
 
-import { LayoutSettingTabsContainer } from '../../styles/layout';
+import { LayoutSettingTabsContainer } from '@/styles/layout';
 
 interface IProps {
     open: boolean

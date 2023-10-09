@@ -1,5 +1,11 @@
 import { defineConfig } from "vite";
+import { resolve } from 'path';
+import * as process from 'process';
 import react from "@vitejs/plugin-react";
+
+function pathResolver(dir: string) {
+  return resolve(process.cwd(), '.', dir);
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
@@ -17,4 +23,13 @@ export default defineConfig(async () => ({
   // 3. to make use of `TAURI_DEBUG` and other env variables
   // https://tauri.studio/v1/api/config#buildconfig.beforedevcommand
   envPrefix: ["VITE_", "TAURI_"],
+
+  resolve: {
+    alias: [
+      {
+        find: '@',
+        replacement: pathResolver('src')
+      }
+    ]
+  }
 }));

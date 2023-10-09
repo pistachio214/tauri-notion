@@ -1,6 +1,6 @@
 
-import { MenuItemType } from "../types/menu";
-import { BreadcrumbOption } from "../types/global";
+import { MenuItemType } from "@/types/menu";
+import { BreadcrumbOption } from "@/types/global";
 
 // 构建面包屑的数据
 export const buildBreadcrumb = (ids: number[], data: MenuItemType[]) => {
@@ -36,7 +36,7 @@ export const buildMenuItemReload = (ids: number[], data: MenuItemType[]) => {
     const newData = [...data]; // 创建一个副本以保留原始数据的不可变性
     let current = newData;
 
-    for (let i = 0; i < ids.length-1; i++) {
+    for (let i = 0; i < ids.length - 1; i++) {
         if (current[ids[i]] && current[ids[i]].children) {
             current[ids[i]].open = true;
             current = current[ids[i]].children!;
