@@ -12,6 +12,7 @@ import { MarkDownEditorState } from '@/types/editor';
 import { RootState } from '@/redux/store';
 import { setSystemMenuReload } from '@/redux/slice/system';
 import { SystemState } from '@/types/system';
+import { MenuItemType } from '@/types/menu';
 
 const Dashboard: React.FC = () => {
     const {
@@ -44,9 +45,8 @@ const Dashboard: React.FC = () => {
         setMdContent(editorState.content);
     }
 
-    const handleEditorSave = (value: string) => {
-
-        let data = {
+    const addMenu = (value: string) => {
+        const data = {
             label: generateLabel(value),
             type: editorState.hierarchy,
             open: false,
@@ -59,12 +59,58 @@ const Dashboard: React.FC = () => {
 
                 dispatch(setSystemMenuReload(!systemState.menu_reload))
                 message.success('保存成功');
-                
+
             })
             .catch((e) => {
                 console.log(e);
                 message.error('保存失败');
             })
+    }
+
+    const editMenu = (value: string) => {
+        const id = systemState.menu_select_key;
+
+        invoke<MenuItemType>("menu_find", { id })
+            .then((res) => {
+                const data = {
+                    ...res,
+                    ...{
+                        label: generateLabel(value),
+                        content: value,
+
+                    }
+                }
+                invoke("menu_edit", { id, data })
+                    .then(() => {
+                        dispatch(setSystemMenuReload(!systemState.menu_reload))
+                        message.success('保存成功');
+
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                        message.error('保存失败');
+                    })
+            })
+            .catch(err => { message.error(err) })
+    }
+
+    const handleEditorSave = (value: string) => {
+        let state = editorState.state;
+
+        console.log(state);
+
+        switch (state) {
+            case 1: // 展示
+                break;
+            case 2: // 编辑
+                editMenu(value);
+                break;
+            case 3: // 新增
+                addMenu(value);
+                break;
+            default:
+                message.error("非法操作")
+        }
     }
 
     const generateLabel = (value: string) => {

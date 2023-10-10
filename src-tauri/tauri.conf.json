@@ -46,8 +46,8 @@
         "fullscreen": false,
         "resizable": true,
         "title": "Tauri Notion",
-        "width": 1500,
-        "height": 1000,
+        "width": 1200,
+        "height": 900,
         "center": true
       }
     ]

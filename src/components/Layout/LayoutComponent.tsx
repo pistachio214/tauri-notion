@@ -7,7 +7,7 @@ import {
     EditOutlined,
     PlusCircleOutlined,
     SettingOutlined,
-    PlusOutlined,
+    // PlusOutlined,
     DeleteOutlined,
 } from '@ant-design/icons';
 import { Button, Layout, Space, Breadcrumb } from 'antd';
@@ -83,7 +83,7 @@ const App: React.FC = () => {
     }
 
     const createMarkDownEditor = () => {
-        //TODO 这里要处理成对应层级的值
+        // 这里要处理成对应层级的值
         dispatch(setMarkDownEditorHierarchyAndSubfieldAndState({ hierarchy: 1, subfield: true, state: 3 }));
     }
 
@@ -173,13 +173,13 @@ const App: React.FC = () => {
                 <LayoutContent>
                     <LayoutOperation>
                         <div className='layout-operation-container'>
-                            <Button
+                            {/* <Button
                                 icon={<PlusOutlined />}
                                 size='small'
                                 type='text'
                                 title='new tab Ctrl+T'
                                 onClick={() => createMarkDownEditor()}
-                            />
+                            /> */}
 
                             {
                                 !editorState.subfield ? (
@@ -188,7 +188,11 @@ const App: React.FC = () => {
                                         size='small'
                                         type='text'
                                         title='edit tab Ctrl+E'
-                                        onClick={() => editMarkDownEditor(true)}
+                                        onClick={(e) => {
+                                            editMarkDownEditor(true);
+                                            dispatch(setMarkDownEditorState(2));
+                                            e.stopPropagation();
+                                        }}
                                     />
                                 ) : null
                             }

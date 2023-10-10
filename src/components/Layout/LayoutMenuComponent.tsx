@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 
-import { Button, Dropdown } from "antd";
+import { Button, Dropdown, Modal } from "antd";
 import type { MenuProps } from 'antd';
 import {
     FolderOutlined,
     FileTextOutlined,
     FolderOpenOutlined,
     PlusOutlined,
-    EditOutlined,
+    // EditOutlined,
     DeleteOutlined,
     EllipsisOutlined,
+    QuestionCircleOutlined,
+    ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import { shallowEqual } from "react-redux";
 
@@ -31,26 +33,26 @@ import { buildBreadcrumb, buildMenuItemReload } from "@/utils/MenuUtil";
 import { RootState } from "@/redux/store";
 import { SystemState } from "@/types/system";
 import { MarkDownEditorState } from "@/types/editor";
-import { setSystemMenuSelectKey } from "@/redux/slice/system";
+import { setSystemMenuReload, setSystemMenuSelectKey } from "@/redux/slice/system";
+
+const { confirm } = Modal;
 
 const items: MenuProps['items'] = [
-    {
-        label: <div style={{}}>
-            <Button
-                icon={<EditOutlined />}
-                type="link"
-                size="small"
-                style={{
-                }}
-            >
-                重命名
-            </Button>
-        </div>,
-        key: '0',
-    },
-    {
-        type: 'divider',
-    },
+    // {
+    //     label: <div style={{}}>
+    //         <Button
+    //             icon={<EditOutlined />}
+    //             type="link"
+    //             size="small"
+    //         >
+    //             重命名
+    //         </Button>
+    //     </div>,
+    //     key: 'Renaming',
+    // },
+    // {
+    //     type: 'divider',
+    // },
     {
         label: <>
             <Button
@@ -62,7 +64,7 @@ const items: MenuProps['items'] = [
                 删除
             </Button>
         </>,
-        key: '3',
+        key: 'Delete',
     },
 ];
 
@@ -75,6 +77,8 @@ const LayoutMenuComponent: React.FC = () => {
 
     const [menuDataArray, setMenuDataArray] = useState<MenuItemType[]>([]);
     const [menuArray, setMenuArray] = useState<MenuItemType[]>([]);
+    const [menu, setMenu] = useState<MenuItemType>();
+    const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
     useEffect(() => {
         getLocalhostMenuList();
@@ -263,7 +267,6 @@ const LayoutMenuComponent: React.FC = () => {
 
     const clickMenu = (id: string, e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         let ids = findIndexById(menuDataArray, id, []);
-        console.log('ids= ', ids)
 
         let menu: MenuItemType | undefined = undefined;
 
@@ -321,8 +324,58 @@ const LayoutMenuComponent: React.FC = () => {
         dispatch(setMarkDownEditorChildrenKey(ids));
         dispatch(setMarkDownEditorHierarchyAndSubfieldAndState({ hierarchy: (menu.type + 1), subfield: true, state: 3 }));
 
+        dispatch(setSystemMenuSelectKey(menu.id));
+
         e.stopPropagation();
     }
+
+    const renamingAction = () => { }
+
+    const deleteAction = () => {
+        let id = menu?.id;
+
+        invoke<MenuItemType>("menu_find", { id })
+            .then((res) => {
+                confirm({
+                    icon: <ExclamationCircleOutlined />,
+                    content: `是否确定删除 【 ${res.label} 】 ？`,
+                    centered: true,
+                    onOk() {
+                        invoke("menu_delete", { id }).then(() => {
+                            message.success("删除成功");
+                            dispatch(setSystemMenuReload(!systemState.menu_reload))
+                            // 删除成功 干掉面包屑、编辑器内容、选中的key
+                            dispatch(setBreadcrumbItems([]));
+                            dispatch(setMarkDownEditorContentAndStateAndSubfield({ content: "", state: 1, subfield: false }));
+
+                        }).catch(() => {
+                            message.error("错误删除")
+                        })
+                    },
+                    onCancel() {
+                        console.log('Cancel');
+                    },
+                });
+            })
+            .catch(err => { message.error(err) })
+
+
+    }
+
+    const dropdownOnClick: MenuProps['onClick'] = ({ key, domEvent }) => {
+        switch (key) {
+            case "Renaming":
+                renamingAction();
+                break;
+            case "Delete":
+                deleteAction();
+                break;
+            default:
+                message.error("错误点击");
+        }
+
+        domEvent.stopPropagation();
+    };
 
     return (
         <LayoutMenuContainer>
@@ -345,7 +398,7 @@ const LayoutMenuComponent: React.FC = () => {
                                 <div className="menu-action-container">
                                     <div className="action-item">
                                         <Dropdown
-                                            menu={{ items }}
+                                            menu={{ items, onClick: dropdownOnClick }}
                                             trigger={['click']}
                                             overlayClassName="action-dropdown"
                                             placement={'bottomLeft'}
@@ -353,13 +406,14 @@ const LayoutMenuComponent: React.FC = () => {
                                                 padding: 0,
                                                 margin: 0,
                                             }}
+
                                         >
                                             <Button
                                                 className="icon-style"
                                                 icon={<EllipsisOutlined />}
                                                 type="text"
                                                 size='small'
-                                                onClick={(e) => clickMenuAdd(item, e)}
+                                                onClick={(e) => { setMenu(item); e.stopPropagation(); }}
                                             />
                                         </Dropdown>
 
@@ -378,7 +432,17 @@ const LayoutMenuComponent: React.FC = () => {
                     })
                 }
             </dl>
-        </LayoutMenuContainer>
+
+            <Modal
+                title={<><QuestionCircleOutlined /> 删除文档</>}
+                centered
+                open={deleteModal}
+                onOk={() => { }}
+                onCancel={() => setDeleteModal(false)}
+            >
+                <p>是否确定删除？</p>
+            </Modal>
+        </LayoutMenuContainer >
     )
 
 }

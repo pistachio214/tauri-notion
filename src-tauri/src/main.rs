@@ -57,22 +57,80 @@ fn generate_json() {
     print!("到底进来没得哟?2");
 }
 
+#[tauri::command]
+fn menu_find(id: String) -> Result<MenuItemType, String> {
+    let mut cache_menu: Vec<MenuItemType> = get_cache_menu();
+    let cache_index: Option<usize> = cache_menu.iter().position(|menu| menu.id == id);
+    if let Some(index_cache) = cache_index {
+        let item = cache_menu.remove(index_cache);
+
+        return Ok(item);
+    } else {
+        let mut local_menu: Vec<MenuItemType> = get_local_menu();
+        let local_index: Option<usize> = local_menu.iter().position(|menu| menu.id == id);
+        if let Some(index_local) = local_index {
+            let item = local_menu.remove(index_local);
+            return Ok(item);
+        } else {
+            return Err("没有找到该信息，如果确定远程仓库有该信息,请同步后再尝试".to_string());
+        }
+    }
+}
+
+#[tauri::command]
+fn menu_edit(id: String, data: MenuItemTypeReq) -> Result<(), String> {
+    let mut cache_menu: Vec<MenuItemType> = get_cache_menu();
+
+    let edit_data: MenuItemType = MenuItemType {
+        id: id.clone(),
+        r#type: data.r#type,
+        parent_id: data.parent_id,
+        label: data.label,
+        open: false,
+        children: None,
+        content: data.content,
+    };
+
+    let cache_index: Option<usize> = cache_menu.iter().position(|menu| menu.id == id);
+    if let Some(index) = cache_index {
+        print!("11111");
+        cache_menu[index] = edit_data;
+    } else {
+        print!("222");
+        cache_menu.push(edit_data);
+    }
+
+    set_cache_menu(cache_menu);
+
+    Ok(())
+}
+
+// 用户菜单列表数据删除
+#[tauri::command]
+fn menu_delete(id: String) -> Result<String, String> {
+    let mut local_menu: Vec<MenuItemType> = get_local_menu();
+    let mut cache_menu: Vec<MenuItemType> = get_cache_menu();
+
+    let local_index: Option<usize> = local_menu.iter().position(|menu| menu.id == id);
+    if let Some(index) = local_index {
+        local_menu.remove(index);
+    }
+
+    let cache_index: Option<usize> = cache_menu.iter().position(|menu| menu.id == id);
+    if let Some(index) = cache_index {
+        cache_menu.remove(index);
+    }
+
+    set_local_menu(local_menu);
+    set_cache_menu(cache_menu);
+
+    Ok("xxx".to_string())
+}
+
 // 新增用户的菜单列表数据到暂存区
 #[tauri::command]
 fn menu_create(data: MenuItemTypeReq) -> Result<Vec<MenuItemType>, String> {
-    let file: String = String::from("user_menu_temp.json");
-
-    find_dir_and_file(&file, "[]");
-
-    let file_path = get_data_file(file);
-
-    // 上一步保证了文件必存在,此时获取文件内容毫无压力
-    let user_menu = tauri::api::file::read_string(file_path.clone()).unwrap();
-
-    let mut user_menu_array: Vec<MenuItemType> = match serde_json::from_str(&user_menu) {
-        Ok(res) => res,
-        Err(_) => Vec::new(),
-    };
+    let mut user_menu_array: Vec<MenuItemType> = get_cache_menu();
 
     let push_data: MenuItemType = MenuItemType {
         id: Uuid::new_v4().to_string(),
@@ -86,7 +144,7 @@ fn menu_create(data: MenuItemTypeReq) -> Result<Vec<MenuItemType>, String> {
 
     user_menu_array.push(push_data);
 
-    std::fs::write(&file_path, serde_json::to_string(&user_menu_array).unwrap()).unwrap();
+    set_cache_menu(user_menu_array.clone());
 
     return Ok(user_menu_array);
 }
@@ -188,6 +246,9 @@ fn main() {
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
+            menu_find,
+            menu_edit,
+            menu_delete,
             menu_create,
             add_user_info,
             get_user_config_list,
@@ -217,6 +278,19 @@ fn get_cache_menu() -> Vec<MenuItemType> {
 
     return user_menu_array;
 }
+
+// 写入 Cache blocks 的menu数据
+fn set_cache_menu(data: Vec<MenuItemType>) -> Vec<MenuItemType> {
+    let file: String = String::from("user_menu_temp.json");
+
+    find_dir_and_file(&file, "[]");
+
+    let file_path = get_data_file(file);
+
+    std::fs::write(&file_path, serde_json::to_string(&data).unwrap()).unwrap();
+    return data;
+}
+
 // 获取 Local blocks 的menu数据
 fn get_local_menu() -> Vec<MenuItemType> {
     let file: String = String::from("user_menu.json");
@@ -234,6 +308,18 @@ fn get_local_menu() -> Vec<MenuItemType> {
     };
 
     return user_menu_array;
+}
+
+// 写入 Local blocks 的menu数据
+fn set_local_menu(data: Vec<MenuItemType>) -> Vec<MenuItemType> {
+    let file: String = String::from("user_menu.json");
+
+    find_dir_and_file(&file, "[]");
+
+    let file_path = get_data_file(file);
+
+    std::fs::write(&file_path, serde_json::to_string(&data).unwrap()).unwrap();
+    return data;
 }
 
 // 获取应用的data地址
