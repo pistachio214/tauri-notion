@@ -19,10 +19,10 @@ const RouterComponent: React.FC = () => {
                         <Route
                             path={"/"}
                             element={
-                                // sessionStorage.getItem("token") ?
-                                //     <Dashboard /> : <Login />
+                                sessionStorage.getItem("token") ?
+                                    <Dashboard /> : <Login />
 
-                                <Navigate to={'/dashboard'} />
+                                // <Navigate to={'/dashboard'} />
                             }
                         />
                         <Route path={"/login"} element={<Login />} />

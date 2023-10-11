@@ -3,9 +3,10 @@
 
 use base64_url;
 use bcrypt::{hash, verify, DEFAULT_COST};
+use reqwest::{Client, Method};
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::path::PathBuf;
+use std::{error::Error, fs};
 use tauri::{api::path, utils::assets::EmbeddedAssets, Config};
 use uuid::Uuid;
 
@@ -51,10 +52,87 @@ struct MenuItemTypeReq {
     parent_id: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct GiteePullRes {
+    r#type: String,
+    encoding: String,
+    size: i32,
+    name: String,
+    path: String,
+    content: String,
+    sha: String,
+    url: String,
+    html_url: String,
+    download_url: String,
+    _links: GiteePullLinks,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct GiteePullLinks {
+    #[serde(rename = "self")]
+    self_: String,
+    html: String,
+}
+
 // 测试案例,放在最上面,封测就删掉
 #[tauri::command]
 fn generate_json() {
-    print!("到底进来没得哟?2");
+    print!("到底进来没得哟?");
+}
+
+// TODO 有合并数据的时候,需要push到远端
+#[tauri::command]
+fn menu_sync_push(
+    sha: String,
+    user: SysUserType,
+    data: Vec<MenuItemType>,
+) -> Result<String, String> {
+    match gitee_push(sha, data, user) {
+        Ok(_) => {
+            return Ok("success".to_string());
+        }
+        Err(_) => {
+            return Err("同步失败".to_string());
+        }
+    };
+}
+
+#[tauri::command]
+fn menu_sync_first(
+    data: SysUserType,
+) -> Result<(Vec<MenuItemType>, Vec<MenuItemType>, String), String> {
+    let mut sha = String::from("");
+    // 1. 先把远端的数据pull到本地
+    let gitee_data_str = gitee_pull(data).unwrap();
+    println!("gitee_data_str= {}", gitee_data_str);
+    if gitee_data_str.len() > 0 {
+        let gitee_data: GiteePullRes = serde_json::from_str(&gitee_data_str).unwrap();
+        sha = gitee_data.sha;
+        println!("content= {}", gitee_data.content);
+        // let decode_gitee_data = base64_url::decode(&gitee_data.content).unwrap();
+
+        match base64_url::decode(&gitee_data.content) {
+            Ok(e) => {
+                let gitee_content_str = String::from_utf8(e).unwrap();
+                let local_data: Vec<MenuItemType> = serde_json::from_str(&gitee_content_str).unwrap();
+
+                set_local_menu(local_data);
+            }
+            Err(err) => {
+                println!("反正也是不知道错到哪儿了,打出来看看 {:?}", err)
+            }
+        }
+        // print!("decode_gitee_data= {:?}", decode_gitee_data);
+        // let gitee_content_str = String::from_utf8(decode_gitee_data).unwrap();
+        // let local_data: Vec<MenuItemType> = serde_json::from_str(&gitee_content_str).unwrap();
+
+        // set_local_menu(local_data);
+    }
+
+    let local_menu: Vec<MenuItemType> = get_local_menu();
+    let cache_menu: Vec<MenuItemType> = get_cache_menu();
+
+    Ok((local_menu, cache_menu, sha.to_string()))
 }
 
 #[tauri::command]
@@ -93,10 +171,8 @@ fn menu_edit(id: String, data: MenuItemTypeReq) -> Result<(), String> {
 
     let cache_index: Option<usize> = cache_menu.iter().position(|menu| menu.id == id);
     if let Some(index) = cache_index {
-        print!("11111");
         cache_menu[index] = edit_data;
     } else {
-        print!("222");
         cache_menu.push(edit_data);
     }
 
@@ -124,7 +200,7 @@ fn menu_delete(id: String) -> Result<String, String> {
     set_local_menu(local_menu);
     set_cache_menu(cache_menu);
 
-    Ok("xxx".to_string())
+    Ok("success".to_string())
 }
 
 // 新增用户的菜单列表数据到暂存区
@@ -246,6 +322,8 @@ fn main() {
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
+            menu_sync_push,
+            menu_sync_first,
             menu_find,
             menu_edit,
             menu_delete,
@@ -258,6 +336,92 @@ fn main() {
         ])
         .run(context)
         .expect("error while running tauri application");
+}
+
+// 本地 push 数据到远端
+#[tokio::main]
+async fn gitee_push(
+    sha: String,
+    content: Vec<MenuItemType>,
+    data: SysUserType,
+) -> Result<String, Box<dyn Error>> {
+    let access_u8 = base64_url::decode(&data.access_token).unwrap();
+
+    let access_token = String::from_utf8(access_u8)?;
+    let banner = &data.branch;
+
+    let owner = &data.owner;
+    let repo = &data.repo;
+
+    let path = "data.json";
+
+    let url_string = format!(
+        "https://gitee.com/api/v5/repos/{}/{}/contents/{}",
+        owner, repo, path
+    );
+
+    let client = Client::new();
+    let request = client
+        .request(Method::PUT, url_string)
+        .header("Accept", "/")
+        .form(&[
+            ("access_token", access_token),
+            ("branch", banner.to_string()),
+            (
+                "content",
+                hash(serde_json::to_string(&content).unwrap(), DEFAULT_COST).unwrap(),
+            ),
+            ("sha", sha),
+            ("message", "同步数据".to_string()),
+        ]);
+
+    request.send().await?;
+
+    Ok("push success".to_string())
+}
+
+// 远端拉取数据到本地
+#[tokio::main]
+async fn gitee_pull(data: SysUserType) -> Result<String, Box<dyn Error>> {
+    let access_u8 = base64_url::decode(&data.access_token).unwrap();
+
+    let access_token = String::from_utf8(access_u8)?;
+    let banner = &data.branch;
+
+    let owner = &data.owner;
+    let repo = &data.repo;
+
+    let path: &str = "data.json";
+
+    let url_string = format!(
+        "https://gitee.com/api/v5/repos/{}/{}/contents/{}",
+        owner, repo, path
+    );
+
+    let client = Client::new();
+    let request = client
+        .request(Method::GET, url_string)
+        .header("Accept", "/")
+        .query(&[("access_token", access_token), ("ref", banner.to_string())]);
+
+    let res = request.send().await?;
+
+    let body = res.bytes().await?;
+    let v = body.to_vec();
+
+    let v_str = String::from_utf8(v);
+
+    match v_str {
+        Ok(e) => {
+            if e == "[]" {
+                return Ok("".to_string());
+            }
+            return Ok(e);
+        }
+        Err(_) => {
+            return Ok("".to_string());
+        }
+    };
 }
 
 // 获取 Cache blocks 的menu数据

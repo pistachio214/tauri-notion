@@ -10,7 +10,6 @@ import {
     // EditOutlined,
     DeleteOutlined,
     EllipsisOutlined,
-    QuestionCircleOutlined,
     ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import { shallowEqual } from "react-redux";
@@ -29,7 +28,7 @@ import {
     setMarkDownEditorHierarchyAndSubfieldAndState
 } from "@/redux/slice/editor";
 import { MenuItem, MenuItemType } from "@/types/menu";
-import { buildBreadcrumb, buildMenuItemReload } from "@/utils/MenuUtil";
+import { buildBreadcrumb, buildMenuItemReload, mergeLocalAndCacheMenu } from "@/utils/MenuUtil";
 import { RootState } from "@/redux/store";
 import { SystemState } from "@/types/system";
 import { MarkDownEditorState } from "@/types/editor";
@@ -78,7 +77,6 @@ const LayoutMenuComponent: React.FC = () => {
     const [menuDataArray, setMenuDataArray] = useState<MenuItemType[]>([]);
     const [menuArray, setMenuArray] = useState<MenuItemType[]>([]);
     const [menu, setMenu] = useState<MenuItemType>();
-    const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
     useEffect(() => {
         getLocalhostMenuList();
@@ -124,52 +122,10 @@ const LayoutMenuComponent: React.FC = () => {
     }
 
     const buildMenuItem = (localMenu: MenuItemType[], cacheMenu: MenuItemType[]) => {
-        let tempMenu: MenuItemType[] = [];
-
-        // local blocks is empty and cache blocks is empty
-        if (localMenu.length < 1 && cacheMenu.length < 1) {
-            tempMenu = [];
-        }
-
-        // local blocks is empty
-        if (localMenu.length < 1) {
-            tempMenu = cacheMenu;
-        }
-
-        // cache blocks is empty
-        if (cacheMenu.length < 1) {
-            tempMenu = localMenu;
-        }
-
-        tempMenu = [...localMenu];
-
-        // 1. 查询缓冲中的 同 id数据，以缓存为准
-        tempMenu.forEach((tempItem: MenuItemType, index: number) => {
-            cacheMenu.forEach((cacheItem: MenuItemType) => {
-                if (tempItem.id === cacheItem.id) {
-                    tempMenu[index] = cacheItem;
-                }
-            });
-        });
-
-        // 2. 缓存中的数据，如果本地不存在,则加入进去
-        cacheMenu.forEach((cacheItem: MenuItemType) => {
-            let existence = false;
-            localMenu.forEach((tempItem: MenuItemType) => {
-                if (cacheItem.id === tempItem.id) {
-                    existence = true;
-                }
-            })
-
-            if (!existence) {
-                tempMenu.push(cacheItem);
-            }
-        });
-
+        let tempMenu: MenuItemType[] = mergeLocalAndCacheMenu(localMenu, cacheMenu);
         tempMenu = buildChildren(tempMenu);
 
         buildMenuItemReload(editorState.childrenKey, tempMenu);
-
         setMenuDataArray(tempMenu);
     }
 
@@ -433,15 +389,6 @@ const LayoutMenuComponent: React.FC = () => {
                 }
             </dl>
 
-            <Modal
-                title={<><QuestionCircleOutlined /> 删除文档</>}
-                centered
-                open={deleteModal}
-                onOk={() => { }}
-                onCancel={() => setDeleteModal(false)}
-            >
-                <p>是否确定删除？</p>
-            </Modal>
         </LayoutMenuContainer >
     )
 

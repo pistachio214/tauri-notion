@@ -117,6 +117,8 @@ const Login: React.FC = () => {
                 .then(res => {
                     sessionStorage.setItem("token", res.id!);
 
+                    sessionStorage.setItem("user_info", JSON.stringify(res));
+
                     message.success('🎉🎉🎉 登录成功', 1);
                     navigate('/dashboard');
                 })

@@ -5,16 +5,19 @@ import {
     FileTextOutlined,
     EyeOutlined,
     EditOutlined,
-    PlusCircleOutlined,
+    FolderAddOutlined,
     SettingOutlined,
     // PlusOutlined,
-    DeleteOutlined,
+    InsertRowAboveOutlined,
+    ExclamationOutlined,
 } from '@ant-design/icons';
-import { Button, Layout, Space, Breadcrumb } from 'antd';
+import { Button, Layout, Space, Breadcrumb, Modal } from 'antd';
 import { ItemType } from 'antd/es/breadcrumb/Breadcrumb';
 import { shallowEqual } from "react-redux";
 
 import { Outlet } from 'react-router';
+
+import { invoke } from '@tauri-apps/api/tauri';
 
 import { useAppDispatch, useAppSelector } from '@/redux/hook';
 import {
@@ -23,16 +26,19 @@ import {
     setMarkDownEditorState,
     setMarkDownEditorSubfield
 } from '@/redux/slice/editor';
-
 import { LogoContainer, LayoutContent, LayoutOperation } from '@/styles/layout';
 import { RootState } from '@/redux/store';
 import { MarkDownEditorState } from '@/types/editor';
 import { BreadcrumbItemState, BreadcrumbOption } from '@/types/global';
+import { message } from '@/components/Antd/EscapeAntd';
 import LayoutMenuComponent from '@/components/Layout/LayoutMenuComponent';
 import LayoutSettingModalComponent from '@/components/Layout/LayoutSettingModalComponent';
-
+import { MenuItem, MenuItemType } from '@/types/menu';
+import { mergeLocalAndCacheMenu } from '@/utils/MenuUtil';
+import { SysUser } from '@/types/user';
 
 const { Sider } = Layout;
+const { confirm } = Modal;
 
 const App: React.FC = () => {
 
@@ -87,7 +93,10 @@ const App: React.FC = () => {
         dispatch(setMarkDownEditorHierarchyAndSubfieldAndState({ hierarchy: 1, subfield: true, state: 3 }));
     }
 
-    const editMarkDownDelete = () => { }
+    // 打开模板库
+    const editMarkDownTemplate = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+        e.stopPropagation();
+    }
 
     const newPage = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         dispatch(setMarkDownEditorHierarchyAndParentId({ hierarchy: 1, parentId: "0" }))
@@ -97,9 +106,45 @@ const App: React.FC = () => {
     }
 
     const syncMenuAction = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+        let user_info_str = sessionStorage.getItem("user_info");
+        let sysUser: SysUser = JSON.parse(user_info_str!);
 
-        console.log('这里进行询问是否进行全局同步');
+        invoke<MenuItem[][]>('menu_sync_first', { data: sysUser })
+            .then((res: any[]) => {
+                console.log(res)
+        //         let localMenu: MenuItemType[] = res[0];
+        //         let cacheMenu: MenuItemType[] = res[1];
 
+        //         let sha: string = res[2];
+
+        //         if (res[1].length > 0) { // 有调整的数据的时候,则提示合并
+
+        //             confirm({
+        //                 icon: <ExclamationOutlined />,
+        //                 title: `特别提醒！！！`,
+        //                 content: `同步之前需要合并数据，是否确认同步全部数据？`,
+        //                 centered: true,
+        //                 onOk() {
+        //                     let tempMenu: MenuItemType[] = mergeLocalAndCacheMenu(localMenu, cacheMenu);
+
+        //                     invoke('menu_sync_push', { sha, user: sysUser, data: tempMenu })
+        //                         .then(() => {
+        //                             message.success("同步成功")
+        //                         })
+        //                         .catch(() => {
+        //                             message.error("同步删除")
+        //                         })
+        //                 },
+        //                 onCancel() {
+        //                     console.log('Cancel');
+        //                 },
+        //             });
+        //         }
+            })
+            .catch((e) => {
+                console.log(e);
+                message.error("获取本地数据异常,请检查错误")
+            })
         e.stopPropagation();
     }
 
@@ -137,7 +182,7 @@ const App: React.FC = () => {
 
                     <Button
                         className='operitem-botton'
-                        icon={<PlusCircleOutlined twoToneColor={'#989793'} />}
+                        icon={<FolderAddOutlined twoToneColor={'#989793'} />}
                         type='text'
                         onClick={(e) => {
                             newPage(e);
@@ -187,7 +232,7 @@ const App: React.FC = () => {
                                         icon={<EditOutlined />}
                                         size='small'
                                         type='text'
-                                        title='edit tab Ctrl+E'
+                                        title='编辑'
                                         onClick={(e) => {
                                             editMarkDownEditor(true);
                                             dispatch(setMarkDownEditorState(2));
@@ -200,23 +245,35 @@ const App: React.FC = () => {
                             {
                                 editorState.subfield ? (
                                     <Button
+                                        icon={<InsertRowAboveOutlined />}
+                                        size='small'
+                                        type='text'
+                                        title='模板'
+                                        onClick={(e) => editMarkDownTemplate(e)}
+                                    />
+                                ) : null
+                            }
+
+                            {
+                                editorState.subfield ? (
+                                    <Button
                                         icon={<EyeOutlined />}
                                         size='small'
                                         type='text'
-                                        title='edit tab Ctrl+E'
+                                        title='预览'
                                         onClick={() => editMarkDownEditor(false)}
                                     />
                                 ) : null
                             }
 
-                            <Button
+                            {/* <Button
                                 icon={<DeleteOutlined />}
                                 size='small'
                                 type='text'
                                 danger
                                 title='删除'
                                 onClick={() => editMarkDownDelete()}
-                            />
+                            /> */}
 
                             <Breadcrumb
                                 items={breadcrumbItems}

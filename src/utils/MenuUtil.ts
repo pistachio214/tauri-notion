@@ -47,3 +47,55 @@ export const buildMenuItemReload = (ids: number[], data: MenuItemType[]) => {
 
     return current;
 }
+
+/**
+ * 合并本地与缓存中的数据
+ * @param localMenu 本地数据
+ * @param cacheMenu 缓存数据
+ * @returns 
+ */
+export const mergeLocalAndCacheMenu = (localMenu: MenuItemType[], cacheMenu: MenuItemType[]) => {
+    let tempMenu: MenuItemType[] = [];
+
+    // local blocks is empty and cache blocks is empty
+    if (localMenu.length < 1 && cacheMenu.length < 1) {
+        tempMenu = [];
+    }
+
+    // local blocks is empty
+    if (localMenu.length < 1) {
+        tempMenu = cacheMenu;
+    }
+
+    // cache blocks is empty
+    if (cacheMenu.length < 1) {
+        tempMenu = localMenu;
+    }
+
+    tempMenu = [...localMenu];
+
+    // 1. 查询缓冲中的 同 id数据，以缓存为准
+    tempMenu.forEach((tempItem: MenuItemType, index: number) => {
+        cacheMenu.forEach((cacheItem: MenuItemType) => {
+            if (tempItem.id === cacheItem.id) {
+                tempMenu[index] = cacheItem;
+            }
+        });
+    });
+
+    // 2. 缓存中的数据，如果本地不存在,则加入进去
+    cacheMenu.forEach((cacheItem: MenuItemType) => {
+        let existence = false;
+        localMenu.forEach((tempItem: MenuItemType) => {
+            if (cacheItem.id === tempItem.id) {
+                existence = true;
+            }
+        })
+
+        if (!existence) {
+            tempMenu.push(cacheItem);
+        }
+    });
+
+    return tempMenu;
+}
