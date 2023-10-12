@@ -108,7 +108,7 @@ const App: React.FC = () => {
     }
 
     const syncMenuAction = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-        let user_info_str = sessionStorage.getItem("user_info");
+        let user_info_str = localStorage.getItem("user_info");
         let sysUser: SysUser = JSON.parse(user_info_str!);
 
         invoke<MenuItem[][]>('menu_sync_first', { data: sysUser })

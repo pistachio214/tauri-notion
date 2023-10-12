@@ -2,7 +2,7 @@ import React, {
     Suspense
 } from "react";
 import { Spin } from "antd";
-import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
+import { HashRouter, Route, Routes } from "react-router-dom";
 
 import LayoutComponent from '@/components/Layout/LayoutComponent';
 
@@ -19,7 +19,7 @@ const RouterComponent: React.FC = () => {
                         <Route
                             path={"/"}
                             element={
-                                sessionStorage.getItem("token") ?
+                                localStorage.getItem("token") ?
                                     <Dashboard /> : <Login />
 
                                 // <Navigate to={'/dashboard'} />

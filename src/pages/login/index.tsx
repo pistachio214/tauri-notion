@@ -46,7 +46,7 @@ const Login: React.FC = () => {
     const [options, setOptions] = useState<SelectProps['options']>([]);
 
     useEffect(() => {
-        sessionStorage.clear();
+        localStorage.clear();
     }, [])  //eslint-disable-line
 
     useEffect(() => {
@@ -84,9 +84,9 @@ const Login: React.FC = () => {
 
             invoke<SysUser>('user_login', { username: data.id, password: data.password })
                 .then(res => {
-                    sessionStorage.setItem("token", res.id!);
+                    localStorage.setItem("token", res.id!);
 
-                    sessionStorage.setItem("user_info", JSON.stringify(res));
+                    localStorage.setItem("user_info", JSON.stringify(res));
 
                     message.success('🎉🎉🎉 登录成功', 1);
                     navigate('/dashboard');

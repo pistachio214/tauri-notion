@@ -72,7 +72,7 @@ const LayoutSettingModalComponent: React.FC<IProps> = (props: IProps) => {
                                 centered: true,
                                 onOk() {
                                     invoke("logout").then(() => {
-                                        sessionStorage.clear();
+                                        localStorage.clear();
 
                                         dispatch(restMarkDownEditor())
                                         dispatch(setBreadcrumbItems([]));
