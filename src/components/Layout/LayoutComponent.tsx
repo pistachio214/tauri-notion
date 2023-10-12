@@ -7,11 +7,10 @@ import {
     EditOutlined,
     FolderAddOutlined,
     SettingOutlined,
-    // PlusOutlined,
     InsertRowAboveOutlined,
     ExclamationOutlined,
 } from '@ant-design/icons';
-import { Button, Layout, Space, Breadcrumb, Modal } from 'antd';
+import { Button, Layout, Space, Breadcrumb } from 'antd';
 import { ItemType } from 'antd/es/breadcrumb/Breadcrumb';
 import { shallowEqual } from "react-redux";
 import CryptoJS from 'crypto-js';
@@ -31,15 +30,16 @@ import { LogoContainer, LayoutContent, LayoutOperation } from '@/styles/layout';
 import { RootState } from '@/redux/store';
 import { MarkDownEditorState } from '@/types/editor';
 import { BreadcrumbItemState, BreadcrumbOption } from '@/types/global';
-import { message } from '@/components/Antd/EscapeAntd';
+import { message, modal } from '@/components/Antd/EscapeAntd';
 import LayoutMenuComponent from '@/components/Layout/LayoutMenuComponent';
 import LayoutSettingModalComponent from '@/components/Layout/LayoutSettingModalComponent';
 import { MenuItem, MenuItemType } from '@/types/menu';
 import { mergeLocalAndCacheMenu } from '@/utils/MenuUtil';
 import { SysUser } from '@/types/user';
+import { setSystemMenuReload } from '@/redux/slice/system';
+import { SystemState } from '@/types/system';
 
 const { Sider } = Layout;
-const { confirm } = Modal;
 
 const App: React.FC = () => {
 
@@ -47,6 +47,7 @@ const App: React.FC = () => {
 
     const editorState: MarkDownEditorState = useAppSelector((state: RootState) => ({ ...state.editor }), shallowEqual);
     const breadcrumbState: BreadcrumbItemState = useAppSelector((state: RootState) => ({ ...state.breadcrumb }), shallowEqual);
+    const systemState: SystemState = useAppSelector((state: RootState) => ({ ...state.system }), shallowEqual);
 
     const [breadcrumbItems, setBreadcrumbItems] = useState<ItemType[]>([]);
     const [settingModal, setSettingModal] = useState<boolean>(false);
@@ -112,15 +113,13 @@ const App: React.FC = () => {
 
         invoke<MenuItem[][]>('menu_sync_first', { data: sysUser })
             .then((res: any[]) => {
-                console.log(res)
                 let localMenu: MenuItemType[] = res[0];
                 let cacheMenu: MenuItemType[] = res[1];
 
                 let sha: string = res[2];
 
                 if (res[1].length > 0) { // 有调整的数据的时候,则提示合并
-
-                    confirm({
+                    modal.confirm({
                         icon: <ExclamationOutlined />,
                         title: `特别提醒！！！`,
                         content: `同步之前需要合并数据，是否确认同步全部数据？`,
@@ -145,7 +144,11 @@ const App: React.FC = () => {
                             console.log('Cancel');
                         },
                     });
+                } else {
+                    message.success("同步成功")
                 }
+
+                dispatch(setSystemMenuReload(!systemState.menu_reload));
             })
             .catch((e) => {
                 console.log(e);
@@ -224,13 +227,6 @@ const App: React.FC = () => {
                 <LayoutContent>
                     <LayoutOperation>
                         <div className='layout-operation-container'>
-                            {/* <Button
-                                icon={<PlusOutlined />}
-                                size='small'
-                                type='text'
-                                title='new tab Ctrl+T'
-                                onClick={() => createMarkDownEditor()}
-                            /> */}
 
                             {
                                 !editorState.subfield ? (
@@ -251,18 +247,6 @@ const App: React.FC = () => {
                             {
                                 editorState.subfield ? (
                                     <Button
-                                        icon={<InsertRowAboveOutlined />}
-                                        size='small'
-                                        type='text'
-                                        title='模板'
-                                        onClick={(e) => editMarkDownTemplate(e)}
-                                    />
-                                ) : null
-                            }
-
-                            {
-                                editorState.subfield ? (
-                                    <Button
                                         icon={<EyeOutlined />}
                                         size='small'
                                         type='text'
@@ -272,14 +256,17 @@ const App: React.FC = () => {
                                 ) : null
                             }
 
-                            {/* <Button
-                                icon={<DeleteOutlined />}
-                                size='small'
-                                type='text'
-                                danger
-                                title='删除'
-                                onClick={() => editMarkDownDelete()}
-                            /> */}
+                            {
+                                editorState.subfield ? (
+                                    <Button
+                                        icon={<InsertRowAboveOutlined />}
+                                        size='small'
+                                        type='text'
+                                        title='模板'
+                                        onClick={(e) => editMarkDownTemplate(e)}
+                                    />
+                                ) : null
+                            }
 
                             <Breadcrumb
                                 items={breadcrumbItems}

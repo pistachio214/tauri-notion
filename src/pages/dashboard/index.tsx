@@ -13,6 +13,7 @@ import { RootState } from '@/redux/store';
 import { setSystemMenuReload } from '@/redux/slice/system';
 import { SystemState } from '@/types/system';
 import { MenuItemType } from '@/types/menu';
+import { setMarkDownEditorContent } from '@/redux/slice/editor';
 
 const Dashboard: React.FC = () => {
     const {
@@ -82,6 +83,7 @@ const Dashboard: React.FC = () => {
                 }
                 invoke("menu_edit", { id, data })
                     .then(() => {
+                        dispatch(setMarkDownEditorContent(value));
                         dispatch(setSystemMenuReload(!systemState.menu_reload))
                         message.success('保存成功');
 
@@ -96,8 +98,6 @@ const Dashboard: React.FC = () => {
 
     const handleEditorSave = (value: string) => {
         let state = editorState.state;
-
-        console.log(state);
 
         switch (state) {
             case 1: // 展示

@@ -17,12 +17,17 @@ export const systemSlice = createSlice({
         setSystemMenuSelectKey: (state: SystemState, action: PayloadAction<string>) => {
             state.menu_select_key = action.payload;
         },
+        restSystem: (state: SystemState) => {
+            state.menu_reload = false;
+            state.menu_select_key = "";
+        }
     },
 });
 
 export const {
     setSystemMenuReload,
     setSystemMenuSelectKey,
+    restSystem,
 } = systemSlice.actions;
 
 export default systemSlice.reducer;

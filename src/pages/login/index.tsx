@@ -10,7 +10,6 @@ import {
     GithubOutlined,
     GitlabFilled,
 } from "@ant-design/icons";
-import { AxiosResponse } from "axios";
 
 import { invoke } from '@tauri-apps/api/tauri'
 
@@ -30,8 +29,6 @@ import react_icon from "@/assets/react.svg";
 import defaultSettings from "@/defaultSettings";
 import CreateUserModalComponent from "@/components/User/CreateUserModalComponent";
 import { SysUser } from "@/types/user";
-import { GiteeErrorResponse, GiteeFileContentRequest, GiteeFileContentResponse } from "@/types/gitee";
-import { getMenuList } from "@/api/gitee";
 
 interface FormState {
     id: string;
@@ -49,7 +46,6 @@ const Login: React.FC = () => {
     const [options, setOptions] = useState<SelectProps['options']>([]);
 
     useEffect(() => {
-        console.log('进来了几次?')
         sessionStorage.clear();
     }, [])  //eslint-disable-line
 
@@ -81,33 +77,6 @@ const Login: React.FC = () => {
             })
         }
     }, [openAddUserModal]); //eslint-disable-line
-
-
-    const gitFileContent = () => {
-        let data: GiteeFileContentRequest = {
-            access_token: '04fe3dabb3769ded506d8122891a04fa',
-            ref: 'master',
-            owner: "flayingoranges",
-            repo: "test-git",
-            path: "menu.json"
-        };
-
-        getMenuList(data)
-            .then((res: AxiosResponse<GiteeFileContentResponse>) => {
-                if (res.data.content !== undefined && res.data.size > 0) {
-                    console.log(atob(res.data.content));
-                }
-
-            })
-            .catch((error: AxiosResponse<GiteeErrorResponse>) => {
-                console.log(error);
-            });
-    }
-
-    const testRust = () => {
-        console.log('push gitee')
-        gitFileContent();
-    }
 
     const onFinish = () => {
         form.validateFields().then(async () => {
@@ -181,14 +150,6 @@ const Login: React.FC = () => {
                         </UsernameButton>
                     </Form.Item>
 
-                    <Form.Item>
-                        <UsernameButton
-                            type="dashed"
-                            onClick={() => testRust()}
-                        >
-                            测试按钮
-                        </UsernameButton>
-                    </Form.Item>
                 </Form>
 
             </LoginBox>

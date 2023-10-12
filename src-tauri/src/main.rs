@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use base64::Engine;
 use base64_url::{self};
 use bcrypt::{hash, verify, DEFAULT_COST};
 use reqwest::{Client, Method};
@@ -80,6 +81,15 @@ fn generate_json() {
     print!("到底进来没得哟?");
 }
 
+// 退出
+#[tauri::command]
+fn logout() -> Result<String, String> {
+    set_cache_menu(Vec::new());
+    set_local_menu(Vec::new());
+
+    Ok("success".to_string())
+}
+
 // 有合并数据的时候,需要push到远端
 #[tauri::command]
 fn menu_sync_push(sha: String, user: SysUserType, data: String) -> Result<String, String> {
@@ -106,8 +116,9 @@ fn menu_sync_first(
         let gitee_data: GiteePullRes = serde_json::from_str(&gitee_data_str).unwrap();
         sha = gitee_data.sha;
 
-        println!("gitee_data_str= {}", &gitee_data.content);
-        let decode_date = base64::decode(&gitee_data.content).unwrap();
+        let decode_date = base64::engine::general_purpose::STANDARD
+            .decode(&gitee_data.content)
+            .unwrap();
         let decode_str = String::from_utf8(decode_date).unwrap();
         let local_data: Vec<MenuItemType> = serde_json::from_str(&decode_str).unwrap();
 
@@ -304,6 +315,7 @@ fn main() {
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
+            logout,
             menu_sync_push,
             menu_sync_first,
             menu_find,
@@ -330,11 +342,7 @@ async fn gitee_push(
     let access_u8 = base64_url::decode(&data.access_token).unwrap();
 
     let access_token = String::from_utf8(access_u8)?;
-
-    println!("access_token = {}", access_token);
-
     let banner = &data.branch;
-
     let owner = &data.owner;
     let repo = &data.repo;
 

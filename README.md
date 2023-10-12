@@ -16,6 +16,11 @@
 - [Redux](https://www.redux.org.cn/)
 - [Rust](https://www.rust-lang.org/)
 
+## 项目截图
+
+![项目登录](./docs/1.png) ![添加账号](./docs/2.png)
+![查看文档](./docs/3.png) ![编辑文档](./docs/4.png)
+
 ## 开发计划
 1. ~~基础框架 react + typescript + antd + rust 搭建~~
 2. ~~Login、Home 界面框架构建~~
