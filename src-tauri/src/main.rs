@@ -85,6 +85,7 @@ fn generate_json() {
 fn menu_sync_push(sha: String, user: SysUserType, data: String) -> Result<String, String> {
     match gitee_push(sha, data, user) {
         Ok(_) => {
+            set_cache_menu(Vec::new());
             return Ok("success".to_string());
         }
         Err(_) => {
