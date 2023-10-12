@@ -1,8 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use base64::{decode, Engine};
-use base64_url;
+use base64_url::{self};
 use bcrypt::{hash, verify, DEFAULT_COST};
 use reqwest::{Client, Method};
 use serde::{Deserialize, Serialize};
@@ -108,9 +107,7 @@ fn menu_sync_first(
 
         println!("gitee_data_str= {}", &gitee_data.content);
         let decode_date = base64::decode(&gitee_data.content).unwrap();
-
         let decode_str = String::from_utf8(decode_date).unwrap();
-
         let local_data: Vec<MenuItemType> = serde_json::from_str(&decode_str).unwrap();
 
         set_local_menu(local_data);

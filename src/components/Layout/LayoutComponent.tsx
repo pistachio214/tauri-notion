@@ -15,8 +15,6 @@ import { Button, Layout, Space, Breadcrumb, Modal } from 'antd';
 import { ItemType } from 'antd/es/breadcrumb/Breadcrumb';
 import { shallowEqual } from "react-redux";
 import CryptoJS from 'crypto-js';
-import sha1 from 'crypto-js/sha1';
-import Base64 from 'crypto-js/enc-base64';
 
 import { Outlet } from 'react-router';
 
