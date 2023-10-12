@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use base64::{decode, Engine};
 use base64_url;
 use bcrypt::{hash, verify, DEFAULT_COST};
 use reqwest::{Client, Method};
@@ -80,13 +81,9 @@ fn generate_json() {
     print!("到底进来没得哟?");
 }
 
-// TODO 有合并数据的时候,需要push到远端
+// 有合并数据的时候,需要push到远端
 #[tauri::command]
-fn menu_sync_push(
-    sha: String,
-    user: SysUserType,
-    data: Vec<MenuItemType>,
-) -> Result<String, String> {
+fn menu_sync_push(sha: String, user: SysUserType, data: String) -> Result<String, String> {
     match gitee_push(sha, data, user) {
         Ok(_) => {
             return Ok("success".to_string());
@@ -104,29 +101,19 @@ fn menu_sync_first(
     let mut sha = String::from("");
     // 1. 先把远端的数据pull到本地
     let gitee_data_str = gitee_pull(data).unwrap();
-    println!("gitee_data_str= {}", gitee_data_str);
+
     if gitee_data_str.len() > 0 {
         let gitee_data: GiteePullRes = serde_json::from_str(&gitee_data_str).unwrap();
         sha = gitee_data.sha;
-        println!("content= {}", gitee_data.content);
-        // let decode_gitee_data = base64_url::decode(&gitee_data.content).unwrap();
 
-        match base64_url::decode(&gitee_data.content) {
-            Ok(e) => {
-                let gitee_content_str = String::from_utf8(e).unwrap();
-                let local_data: Vec<MenuItemType> = serde_json::from_str(&gitee_content_str).unwrap();
+        println!("gitee_data_str= {}", &gitee_data.content);
+        let decode_date = base64::decode(&gitee_data.content).unwrap();
 
-                set_local_menu(local_data);
-            }
-            Err(err) => {
-                println!("反正也是不知道错到哪儿了,打出来看看 {:?}", err)
-            }
-        }
-        // print!("decode_gitee_data= {:?}", decode_gitee_data);
-        // let gitee_content_str = String::from_utf8(decode_gitee_data).unwrap();
-        // let local_data: Vec<MenuItemType> = serde_json::from_str(&gitee_content_str).unwrap();
+        let decode_str = String::from_utf8(decode_date).unwrap();
 
-        // set_local_menu(local_data);
+        let local_data: Vec<MenuItemType> = serde_json::from_str(&decode_str).unwrap();
+
+        set_local_menu(local_data);
     }
 
     let local_menu: Vec<MenuItemType> = get_local_menu();
@@ -234,9 +221,6 @@ fn menu_list() -> Result<(Vec<MenuItemType>, Vec<MenuItemType>), String> {
     Ok((local_menu, cache_menu))
 }
 
-// TOOD 试试能不能同步线上的菜单数据
-// fn syncGiteeMenu() {}
-
 /**
  * 用户登录操作
  */
@@ -342,12 +326,15 @@ fn main() {
 #[tokio::main]
 async fn gitee_push(
     sha: String,
-    content: Vec<MenuItemType>,
+    content: String,
     data: SysUserType,
 ) -> Result<String, Box<dyn Error>> {
     let access_u8 = base64_url::decode(&data.access_token).unwrap();
 
     let access_token = String::from_utf8(access_u8)?;
+
+    println!("access_token = {}", access_token);
+
     let banner = &data.branch;
 
     let owner = &data.owner;
@@ -367,16 +354,18 @@ async fn gitee_push(
         .form(&[
             ("access_token", access_token),
             ("branch", banner.to_string()),
-            (
-                "content",
-                hash(serde_json::to_string(&content).unwrap(), DEFAULT_COST).unwrap(),
-            ),
+            ("content", content),
             ("sha", sha),
             ("message", "同步数据".to_string()),
         ]);
 
-    request.send().await?;
+    let res = request.send().await?;
 
+    println!("result.status = {:?}", res.status());
+    println!(
+        "result = {:?}",
+        String::from_utf8(res.bytes().await?.to_vec()).unwrap()
+    );
     Ok("push success".to_string())
 }
 

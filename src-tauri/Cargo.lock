@@ -3040,6 +3040,7 @@ dependencies = [
 name = "tauri-notion"
 version = "0.0.1"
 dependencies = [
+ "base64 0.21.4",
  "base64-url",
  "bcrypt",
  "reqwest",

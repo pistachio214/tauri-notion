@@ -14,6 +14,9 @@ import {
 import { Button, Layout, Space, Breadcrumb, Modal } from 'antd';
 import { ItemType } from 'antd/es/breadcrumb/Breadcrumb';
 import { shallowEqual } from "react-redux";
+import CryptoJS from 'crypto-js';
+import sha1 from 'crypto-js/sha1';
+import Base64 from 'crypto-js/enc-base64';
 
 import { Outlet } from 'react-router';
 
@@ -112,34 +115,39 @@ const App: React.FC = () => {
         invoke<MenuItem[][]>('menu_sync_first', { data: sysUser })
             .then((res: any[]) => {
                 console.log(res)
-        //         let localMenu: MenuItemType[] = res[0];
-        //         let cacheMenu: MenuItemType[] = res[1];
+                let localMenu: MenuItemType[] = res[0];
+                let cacheMenu: MenuItemType[] = res[1];
 
-        //         let sha: string = res[2];
+                let sha: string = res[2];
 
-        //         if (res[1].length > 0) { // 有调整的数据的时候,则提示合并
+                if (res[1].length > 0) { // 有调整的数据的时候,则提示合并
 
-        //             confirm({
-        //                 icon: <ExclamationOutlined />,
-        //                 title: `特别提醒！！！`,
-        //                 content: `同步之前需要合并数据，是否确认同步全部数据？`,
-        //                 centered: true,
-        //                 onOk() {
-        //                     let tempMenu: MenuItemType[] = mergeLocalAndCacheMenu(localMenu, cacheMenu);
+                    confirm({
+                        icon: <ExclamationOutlined />,
+                        title: `特别提醒！！！`,
+                        content: `同步之前需要合并数据，是否确认同步全部数据？`,
+                        centered: true,
+                        onOk() {
+                            let tempMenu: MenuItemType[] = mergeLocalAndCacheMenu(localMenu, cacheMenu);
 
-        //                     invoke('menu_sync_push', { sha, user: sysUser, data: tempMenu })
-        //                         .then(() => {
-        //                             message.success("同步成功")
-        //                         })
-        //                         .catch(() => {
-        //                             message.error("同步删除")
-        //                         })
-        //                 },
-        //                 onCancel() {
-        //                     console.log('Cancel');
-        //                 },
-        //             });
-        //         }
+                            let json_str = JSON.stringify(tempMenu);
+
+                            var str = CryptoJS.enc.Utf8.parse(json_str);
+                            let encode = CryptoJS.enc.Base64.stringify(str);
+
+                            invoke('menu_sync_push', { sha, user: sysUser, data: encode })
+                                .then(() => {
+                                    message.success("同步成功")
+                                })
+                                .catch(() => {
+                                    message.error("同步删除")
+                                })
+                        },
+                        onCancel() {
+                            console.log('Cancel');
+                        },
+                    });
+                }
             })
             .catch((e) => {
                 console.log(e);
