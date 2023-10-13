@@ -119,10 +119,10 @@ fn menu_sync_first(
 ) -> Result<(Vec<MenuItemType>, Vec<MenuItemType>, String), String> {
     let mut sha = String::from("");
     
-    let r#type = data.r#type.clone();
+    let r#type = data.r#type;
 
     // 1. 先把远端的数据pull到本地
-    if r#type.clone() == 2 {
+    if r#type == 2 {
             let gitee_data_str = gitee_pull(data).unwrap();
 
             if gitee_data_str.len() > 0 {
@@ -139,7 +139,7 @@ fn menu_sync_first(
             }
     }
 
-    if r#type.clone() == 1 {
+    if r#type == 1 {
         return Err("GitHub OpenApi 还未打通,请后续期待.....".to_string());
     }
 
