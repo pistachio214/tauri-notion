@@ -1,24 +1,17 @@
 
 import React from 'react';
-import { Tabs, Modal, Card, Button } from 'antd';
+import { Tabs, Modal, Card } from 'antd';
 import type { TabsProps } from 'antd';
 import {
     TagsOutlined,
     UserOutlined,
     SettingOutlined,
-    WarningOutlined,
+    EditOutlined,
 } from '@ant-design/icons';
 
-import { invoke } from '@tauri-apps/api';
-
 import { LayoutSettingTabsContainer } from '@/styles/layout';
-import { message, modal } from '@/components/Antd/EscapeAntd';
-import { useNavigate } from 'react-router';
-import { useAppDispatch } from '@/redux/hook';
-import { restMarkDownEditor } from '@/redux/slice/editor';
-import { setBreadcrumbItems } from '@/redux/slice/breadcrumb';
-import { restSystem } from '@/redux/slice/system';
-
+import LayoutUserSettingComponent from '@/components/Layout/LayoutUserSettingComponent';
+import LayoutUserChangePasswordComponent from '@/components/Layout/LayoutUserChangePassword';
 
 interface IProps {
     open: boolean
@@ -32,7 +25,7 @@ const AboutApplication = (
         bordered={false}
         style={{
             border: "none",
-            boxShadow: "none"
+            boxShadow: "none",
         }}
     >
         <p>这个应用是我用来做自己的的文本记录操作用的</p>
@@ -46,10 +39,6 @@ const AboutApplication = (
 
 const LayoutSettingModalComponent: React.FC<IProps> = (props: IProps) => {
 
-    const navigate = useNavigate();
-
-    const dispatch = useAppDispatch();
-
     const items: TabsProps['items'] = [
         {
             label: (
@@ -59,40 +48,17 @@ const LayoutSettingModalComponent: React.FC<IProps> = (props: IProps) => {
                 </span>
             ),
             key: '1',
-            children: (
-                <>
-                    <Button
-                        danger
-                        type='primary'
-                        onClick={() => {
-                            modal.confirm({
-                                icon: <WarningOutlined />,
-                                title: `提示！`,
-                                content: `确定退出系统？`,
-                                centered: true,
-                                onOk() {
-                                    invoke("logout").then(() => {
-                                        localStorage.clear();
-
-                                        dispatch(restMarkDownEditor())
-                                        dispatch(setBreadcrumbItems([]));
-                                        dispatch(restSystem());
-
-                                        message.success('🎉🎉🎉 退出成功', 1);
-                                        navigate('/login');
-                                    })
-                                },
-                                onCancel() {
-                                    console.log('Cancel');
-                                },
-                            })
-
-                        }}
-                    >
-                        退出
-                    </Button>
-                </>
+            children: <LayoutUserSettingComponent />,
+        },
+        {
+            label: (
+                <span>
+                    <EditOutlined />
+                    修改密码
+                </span>
             ),
+            key: '2',
+            children: <LayoutUserChangePasswordComponent />,
         },
         {
             label: (
@@ -101,7 +67,7 @@ const LayoutSettingModalComponent: React.FC<IProps> = (props: IProps) => {
                     系统配置
                 </span>
             ),
-            key: '2',
+            key: '3',
             children: `Content of Tab 2`,
         },
         {
@@ -111,7 +77,7 @@ const LayoutSettingModalComponent: React.FC<IProps> = (props: IProps) => {
                     关于应用
                 </span>
             ),
-            key: '3',
+            key: '4',
             children: AboutApplication,
         },
     ];

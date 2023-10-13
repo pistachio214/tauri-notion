@@ -20,11 +20,11 @@ const CreateUserModalComponent: React.FC<IProps> = (props: IProps) => {
 
     const options = [
         {
-            label: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<GithubOutlined />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GitHub </>,
+            label: <><GithubOutlined />&nbsp;&nbsp;&nbsp;&nbsp;GitHub </>,
             value: 1
         },
         {
-            label: <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<GitlabOutlined />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gitee </>,
+            label: <><GitlabOutlined />&nbsp;&nbsp;&nbsp;&nbsp;Gitee </>,
             value: 2
         }
     ];
@@ -142,7 +142,7 @@ const CreateUserModalComponent: React.FC<IProps> = (props: IProps) => {
                             { max: 18, message: "密码长度最大18位" },
                         ]}
                     >
-                        <Input allowClear placeholder="请输入密码" />
+                        <Input.Password allowClear placeholder="请输入密码" />
                     </Form.Item>
 
                     <Form.Item
@@ -155,7 +155,7 @@ const CreateUserModalComponent: React.FC<IProps> = (props: IProps) => {
                             { validator: validateConfirmPassword },
                         ]}
                     >
-                        <Input allowClear placeholder="请输入密码" />
+                        <Input.Password allowClear placeholder="请输入密码" />
                     </Form.Item>
                 </Form>
             </Modal>

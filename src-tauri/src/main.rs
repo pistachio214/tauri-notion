@@ -45,6 +45,15 @@ struct SysUserType {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+struct SysChangeUserSettingType {
+    r#type: i32,
+    access_token: String,
+    owner: String,
+    repo: String,
+    branch: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct MenuItemTypeReq {
     r#type: i32,
     label: String,
@@ -109,20 +118,29 @@ fn menu_sync_first(
     data: SysUserType,
 ) -> Result<(Vec<MenuItemType>, Vec<MenuItemType>, String), String> {
     let mut sha = String::from("");
+    
+    let r#type = data.r#type.clone();
+
     // 1. 先把远端的数据pull到本地
-    let gitee_data_str = gitee_pull(data).unwrap();
+    if r#type.clone() == 2 {
+            let gitee_data_str = gitee_pull(data).unwrap();
 
-    if gitee_data_str.len() > 0 {
-        let gitee_data: GiteePullRes = serde_json::from_str(&gitee_data_str).unwrap();
-        sha = gitee_data.sha;
+            if gitee_data_str.len() > 0 {
+                let gitee_data: GiteePullRes = serde_json::from_str(&gitee_data_str).unwrap();
+                sha = gitee_data.sha;
 
-        let decode_date = base64::engine::general_purpose::STANDARD
-            .decode(&gitee_data.content)
-            .unwrap();
-        let decode_str = String::from_utf8(decode_date).unwrap();
-        let local_data: Vec<MenuItemType> = serde_json::from_str(&decode_str).unwrap();
+                let decode_date = base64::engine::general_purpose::STANDARD
+                    .decode(&gitee_data.content)
+                    .unwrap();
+                let decode_str = String::from_utf8(decode_date).unwrap();
+                let local_data: Vec<MenuItemType> = serde_json::from_str(&decode_str).unwrap();
 
-        set_local_menu(local_data);
+                set_local_menu(local_data);
+            }
+    }
+
+    if r#type.clone() == 1 {
+        return Err("GitHub OpenApi 还未打通,请后续期待.....".to_string());
     }
 
     let local_menu: Vec<MenuItemType> = get_local_menu();
@@ -221,7 +239,7 @@ fn menu_create(data: MenuItemTypeReq) -> Result<Vec<MenuItemType>, String> {
     return Ok(user_menu_array);
 }
 
-// TODO 获取某个用户的菜单列表
+// 获取某个用户的菜单列表
 #[tauri::command]
 fn menu_list() -> Result<(Vec<MenuItemType>, Vec<MenuItemType>), String> {
     let local_menu = get_local_menu();
@@ -231,42 +249,94 @@ fn menu_list() -> Result<(Vec<MenuItemType>, Vec<MenuItemType>), String> {
 }
 
 /**
+ * 修改密码
+ */
+#[tauri::command]
+fn change_user_password(id: String, password: String) -> Result<SysUserType, String> {
+    let mut user_list: Vec<SysUserType> = get_user_config_list();
+
+    let index = user_list.iter().position(|item| match &item.id {
+        Some(u_id) => id == u_id.clone(),
+        None => false,
+    });
+
+    // 检查是否找到匹配的项
+    if let Some(index) = index {
+        let mut sys_user_temp = user_list[index].clone();
+        sys_user_temp.password = hash(password, DEFAULT_COST).unwrap();
+
+        user_list[index] = sys_user_temp.clone();
+
+        set_user_config_list(user_list);
+
+        return Ok(sys_user_temp);
+    } else {
+        return Err("用户配置信息不存在,请确认相关信息".to_string());
+    }
+}
+
+/**
+ * 修改用户配置
+ */
+#[tauri::command]
+fn change_user_setting(id: String, data: SysChangeUserSettingType) -> Result<SysUserType, String> {
+    let mut user_list: Vec<SysUserType> = get_user_config_list();
+
+    let index = user_list.iter().position(|item| match &item.id {
+        Some(u_id) => id == u_id.clone(),
+        None => false,
+    });
+
+    // 检查是否找到匹配的项
+    if let Some(index) = index {
+        let mut sys_user_temp = user_list[index].clone();
+        sys_user_temp.access_token = data.access_token;
+        sys_user_temp.branch = data.branch;
+        sys_user_temp.r#type = data.r#type;
+        sys_user_temp.owner = data.owner;
+        sys_user_temp.repo = data.repo;
+
+        user_list[index] = sys_user_temp.clone();
+
+        set_user_config_list(user_list);
+
+        return Ok(sys_user_temp);
+    } else {
+        return Err("用户配置信息不存在,请确认相关信息".to_string());
+    }
+}
+
+/**
  * 用户登录操作
  */
 #[tauri::command]
 fn user_login(username: String, password: String) -> Result<SysUserType, String> {
     let user_list: Vec<SysUserType> = get_user_config_list();
 
-    let mut sys_user_option: Option<&SysUserType> = None;
-    for user in user_list.iter() {
-        let id = match &user.id {
-            Some(id) => id,
-            None => "",
-        };
+    let index = user_list.iter().position(|item| match &item.id {
+        Some(u_id) => username == u_id.clone(),
+        None => false,
+    });
 
-        if id == username {
-            sys_user_option = Some(user);
-        }
-    }
+    // 检查是否找到匹配的项
+    if let Some(index) = index {
+        let sys_user_temp = user_list[index].clone();
 
-    if sys_user_option.is_none() {
-        return Err("账号信息不存在,请刷新重新操作".to_string());
-    }
+        let verify_password = verify(password, &sys_user_temp.password);
 
-    if let Some(sys_user) = sys_user_option.as_deref() {
-        let verify_password = match verify(password, &sys_user.password) {
-            Ok(_) => true,
+        let verify_password_bool = match verify_password {
+            Ok(v) => v,
             Err(_) => false,
         };
 
-        if verify_password {
-            return Ok(sys_user.clone());
+        if verify_password_bool {
+            return Ok(sys_user_temp);
         } else {
-            return Err("密码不正确，请重新尝试".to_string());
+            return Err("密码错误,请重新确定密码".to_string());
         }
-    };
-
-    Err("账号信息不存在,请刷新重新操作".to_string())
+    } else {
+        return Err("用户配置信息不存在,请确认相关信息".to_string());
+    }
 }
 
 /**
@@ -282,10 +352,7 @@ fn add_user_info(mut data: SysUserType) -> () {
 
     user_data_array.push(data);
 
-    let file: String = String::from("user_data.json");
-    let file_path = get_data_file(file);
-
-    std::fs::write(&file_path, serde_json::to_string(&user_data_array).unwrap()).unwrap();
+    set_user_config_list(user_data_array);
 }
 
 /**
@@ -322,6 +389,8 @@ fn main() {
             menu_edit,
             menu_delete,
             menu_create,
+            change_user_password,
+            change_user_setting,
             add_user_info,
             get_user_config_list,
             user_login,
@@ -472,6 +541,18 @@ fn get_local_menu() -> Vec<MenuItemType> {
 // 写入 Local blocks 的menu数据
 fn set_local_menu(data: Vec<MenuItemType>) -> Vec<MenuItemType> {
     let file: String = String::from("user_menu.json");
+
+    find_dir_and_file(&file, "[]");
+
+    let file_path = get_data_file(file);
+
+    std::fs::write(&file_path, serde_json::to_string(&data).unwrap()).unwrap();
+    return data;
+}
+
+// 写入 用户存储 的menu数据
+fn set_user_config_list(data: Vec<SysUserType>) -> Vec<SysUserType> {
+    let file: String = String::from("user_data.json");
 
     find_dir_and_file(&file, "[]");
 

@@ -78,7 +78,6 @@ const Dashboard: React.FC = () => {
                     ...{
                         label: generateLabel(value),
                         content: value,
-
                     }
                 }
                 invoke("menu_edit", { id, data })

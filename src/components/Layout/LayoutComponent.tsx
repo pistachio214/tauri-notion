@@ -4,7 +4,7 @@ import {
     FolderOutlined,
     FileTextOutlined,
     EyeOutlined,
-    EditOutlined,
+    FormOutlined,
     FolderAddOutlined,
     SettingOutlined,
     InsertRowAboveOutlined,
@@ -209,7 +209,7 @@ const App: React.FC = () => {
                         onClick={(e) => syncMenuAction(e)}
                     >
                         <Space className='new-page'>
-                            Sync Menu
+                            Sync Database
                         </Space>
                     </Button>
                 </LogoContainer>
@@ -231,7 +231,7 @@ const App: React.FC = () => {
                             {
                                 !editorState.subfield ? (
                                     <Button
-                                        icon={<EditOutlined />}
+                                        icon={<FormOutlined />}
                                         size='small'
                                         type='text'
                                         title='编辑'

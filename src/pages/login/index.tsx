@@ -84,6 +84,7 @@ const Login: React.FC = () => {
 
             invoke<SysUser>('user_login', { username: data.id, password: data.password })
                 .then(res => {
+                    console.log('user_login', res);
                     localStorage.setItem("token", res.id!);
 
                     localStorage.setItem("user_info", JSON.stringify(res));
@@ -118,6 +119,7 @@ const Login: React.FC = () => {
                         <Select
                             placeholder={'请选择您的用户'}
                             options={options}
+                            allowClear
                         />
                     </Form.Item>
 
